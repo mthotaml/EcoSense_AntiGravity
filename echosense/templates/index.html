@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EchoSense — Contextual Music Intelligence & Continuous Playback</title>
+    <meta name="description" content="Provider-neutral contextual music intelligence with Spotify Web Playback SDK and Music DNA Autopilot.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- Ambient Glowing Orbs -->
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <div class="app-shell">
+        
+        <!-- 1. Global Header -->
+        <header class="global-header">
+            <div class="container nav-container">
+                <div class="brand">
+                    <div class="brand-icon"><i class="fa-solid fa-compact-disc"></i></div>
+                    <div class="brand-titles">
+                        <span class="brand-name">EchoSense</span>
+                        <span class="brand-tag">Contextual Music Intelligence</span>
+                    </div>
+                </div>
+
+                <div class="connection-status-pill">
+                    <span class="status-dot connected"></span>
+                    <span class="account-name">{{ user_name }}</span>
+                    <button class="btn-disconnect" id="disconnectBtn" title="Disconnect Spotify">
+                        <i class="fa-solid fa-link-slash"></i> Disconnect
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Stream -->
+        <main class="container main-stream">
+            
+            <!-- 2. Greeting & Value Statement -->
+            <section class="greeting-banner">
+                <h1 class="greeting-title">Good {{ context.daypart | capitalize }}, {{ user_name }}</h1>
+                <p class="greeting-sub">Train EchoSense once. Take your music intelligence everywhere.</p>
+            </section>
+
+            <!-- 3. Connection or Recovery Card -->
+            <div class="connection-card card">
+                <div class="connection-left">
+                    <i class="fa-brands fa-spotify spotify-icon"></i>
+                    <div>
+                        <h3>Spotify Integration Status</h3>
+                        <p class="connection-desc">Permissions: User Library, Playback State, Streaming, Top Artists & Tracks</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="btn btn-secondary-save" id="connectSpotifyBtn" style="background: rgba(30, 215, 96, 0.15); color: #1ed760; border: 1px solid rgba(30, 215, 96, 0.4);">
+                        <i class="fa-brands fa-spotify"></i> Connect Real Spotify Account
+                    </button>
+                    <span class="badge badge-success"><i class="fa-solid fa-check"></i> Connected</span>
+                </div>
+            </div>
+
+            <!-- 4. Current Recommendation -->
+            {% if current_pick %}
+            <section class="current-rec-section card">
+                <div class="rec-badge-row">
+                    <span class="pill-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Today's Contextual Pick</span>
+                    <span class="confidence-badge">{{ int(current_pick.confidence * 100) }}% Match Confidence</span>
+                </div>
+
+                <div class="rec-hero-grid">
+                    <img src="{{ current_pick.track.cover_url }}" alt="{{ current_pick.track.title }}" class="rec-cover-img">
+                    <div class="rec-details">
+                        <span class="rec-category-tag">{{ current_pick.track.category }}</span>
+                        <h2 class="rec-track-title">{{ current_pick.track.title }}</h2>
+                        <h3 class="rec-artist-name">{{ current_pick.track.artist_name }} &bull; <em>{{ current_pick.track.album_name }}</em></h3>
+                        
+                        <div class="rec-reason-box">
+                            <i class="fa-solid fa-quote-left reason-quote"></i>
+                            <span class="reason-text">{{ current_pick.why_now }}</span>
+                        </div>
+
+                        <div class="rec-actions">
+                            <button class="btn btn-primary-play" id="startRecBtn" data-id="{{ current_pick.decision_id }}">
+                                <i class="fa-solid fa-play"></i> Play Recommendation
+                            </button>
+                            <button class="btn btn-secondary-save" title="Save to Spotify Library">
+                                <i class="fa-solid fa-bookmark"></i> Save
+                            </button>
+                            <button class="btn btn-danger-skip" id="skipCurrentBtn" title="Skip Current Song">
+                                <i class="fa-solid fa-forward-step"></i> Skip Current Song
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- 5. Music DNA Autopilot & Factor Comparison -->
+            <section class="autopilot-section card">
+                <div class="section-header-row">
+                    <div>
+                        <h2><i class="fa-solid fa-compass"></i> Continuous Music DNA Autopilot</h2>
+                        <p class="section-sub">EchoSense maintains 5 distinct tracks ahead. Click information icons for factor definitions.</p>
+                    </div>
+                    <span class="autopilot-active-tag"><span class="pulse-dot"></span> Autopilot Active</span>
+                </div>
+
+                <!-- Factor Comparison Table -->
+                <div class="table-responsive">
+                    <table class="autopilot-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Upcoming Track</th>
+                                <th>
+                                    Music DNA Affinity 
+                                    <span class="info-icon" tabindex="0" role="button" aria-label="Music DNA affinity definition: How closely the track matches long-term taste from artists, tracks, and genres." title="How closely the track matches long-term taste from artists, tracks, and genres.">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </span>
+                                </th>
+                                <th>
+                                    Live Context Fit 
+                                    <span class="info-icon" tabindex="0" role="button" aria-label="Live context fit definition: How well the track fits current time, weather, location, and activity (capped at 35%)." title="How well the track fits current time, weather, location, and activity (capped at 35%).">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </span>
+                                </th>
+                                <th>
+                                    Learned Preference 
+                                    <span class="info-icon" tabindex="0" role="button" aria-label="Learned preference definition: Bounded adjustment learned from plays, completions, and skips in similar situations." title="Bounded adjustment learned from plays, completions, and skips in similar situations.">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </span>
+                                </th>
+                                <th>
+                                    Diversity Guard 
+                                    <span class="info-icon" tabindex="0" role="button" aria-label="Diversity guard definition: How well the pick avoids repeated tracks or artists and maintains variety." title="How well the pick avoids repeated tracks or artists and maintains variety.">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </span>
+                                </th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dec in autopilot_queue %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <div class="table-track-cell">
+                                        <img src="{{ dec.track.cover_url }}" alt="" class="table-thumb">
+                                        <div>
+                                            <strong class="table-track-title">{{ dec.track.title }}</strong>
+                                            <span class="table-artist">{{ dec.track.artist_name }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: {{ int(dec.factors.dna_affinity*100) }}%;"></span></span> {{ int(dec.factors.dna_affinity*100) }}%</td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: {{ int(dec.factors.live_context_fit*100) }}%;"></span></span> {{ int(dec.factors.live_context_fit*100) }}%</td>
+                                <td><span class="score-pill">+{{ int(dec.factors.learned_preference*100) }}%</span></td>
+                                <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> {{ int(dec.factors.diversity_guard*100) }}%</span></td>
+                                <td><button class="btn-play-now" data-id="{{ dec.decision_id }}">Play now</button></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 7. Context Summary Chips -->
+            <section class="context-summary-section card">
+                <h2><i class="fa-solid fa-cloud-sun"></i> Live Context Resolution</h2>
+                <div class="chips-container">
+                    <div class="context-chip"><i class="fa-regular fa-clock"></i> Daypart: {{ context.daypart | capitalize }}</div>
+                    <div class="context-chip"><i class="fa-solid fa-cloud-sun"></i> Weather: {{ context.weather }}</div>
+                    <div class="context-chip"><i class="fa-solid fa-map-pin"></i> Region: {{ context.coarse_region }}</div>
+                    <div class="context-chip"><i class="fa-solid fa-route"></i> Road: {{ context.road_setting | capitalize }}</div>
+                    <div class="context-chip"><i class="fa-solid fa-bullseye"></i> Activity: {{ context.activity | capitalize }}</div>
+                </div>
+                <p class="privacy-note"><i class="fa-solid fa-lock"></i> Raw coordinates are transient and never stored or logged.</p>
+            </section>
+
+            <!-- 8. Temporal Listening Pattern -->
+            <section class="temporal-pattern-section card">
+                <div class="section-header-row">
+                    <h2><i class="fa-solid fa-brain"></i> Learned Temporal Pattern</h2>
+                    {% if pattern %}
+                    <span class="badge badge-success">Stable Pattern</span>
+                    {% else %}
+                    <span class="badge badge-warning">Still Learning</span>
+                    {% endif %}
+                </div>
+
+                {% if pattern %}
+                <div class="pattern-display-box">
+                    <h3>Current Detected Pattern: <strong>{{ pattern.pattern }}</strong></h3>
+                    <p>Confidence: {{ int(pattern.confidence*100) }}% &bull; Established over {{ pattern.distinct_days }} distinct days across 28-day window.</p>
+                </div>
+                {% endif %}
+
+                <div class="temporal-controls-row">
+                    <form id="correctionForm" class="correction-form">
+                        <input type="text" id="correctedInput" placeholder="Correct pattern interpretation (e.g. Energetic Morning Workout)" required>
+                        <button type="submit" class="btn btn-secondary">Submit Correction</button>
+                    </form>
+                    <button class="btn btn-outline-danger" id="resetTemporalBtn">Reset Temporal Memory</button>
+                </div>
+            </section>
+
+            <!-- 9. Music DNA Summary -->
+            <section class="dna-summary-section card">
+                <h2><i class="fa-solid fa-dna"></i> Music DNA Summary</h2>
+                <div class="dna-stats-grid">
+                    <div class="dna-stat-card">
+                        <span class="stat-value">{{ profile.evidence_count }}</span>
+                        <span class="stat-label">Observed Signals</span>
+                    </div>
+                    <div class="dna-stat-card">
+                        <span class="stat-value">94%</span>
+                        <span class="stat-label">Affinity Accuracy</span>
+                    </div>
+                    <div class="dna-stat-card">
+                        <span class="stat-value">35%</span>
+                        <span class="stat-label">Max Context Cap</span>
+                    </div>
+                    <div class="dna-stat-card">
+                        <span class="stat-value">0%</span>
+                        <span class="stat-label">Data Leaked</span>
+                    </div>
+                </div>
+
+                <div class="delete-consent-row">
+                    <button class="btn btn-danger-delete" id="deleteConsentBtn">
+                        <i class="fa-solid fa-trash-can"></i> Delete All Consent-Derived Data & Reset
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- 11. Persistent Player Bar -->
+        <footer class="persistent-player">
+            <div class="container player-container">
+                <div class="player-left">
+                    <img src="{{ current_pick.track.cover_url }}" alt="" class="player-cover-art" id="playerCover">
+                    <div class="player-track-meta">
+                        <span class="player-title" id="playerTitle">{{ current_pick.track.title }}</span>
+                        <span class="player-artist" id="playerArtist">{{ current_pick.track.artist_name }}</span>
+                    </div>
+                </div>
+
+                <div class="player-center">
+                    <div class="player-btns">
+                        <button class="player-icon-btn" title="Previous"><i class="fa-solid fa-backward-step"></i></button>
+                        <button class="player-play-btn" id="mainPlayBtn" title="Play/Pause"><i class="fa-solid fa-play" id="mainPlayIcon"></i></button>
+                        <button class="player-icon-btn" id="playerSkipBtn" title="Skip to Next"><i class="fa-solid fa-forward-step"></i></button>
+                    </div>
+                </div>
+
+                <div class="player-right">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span class="device-label">Web Player (MacBook)</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Application JavaScript -->
+    <script src="/static/js/spotify_sdk.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

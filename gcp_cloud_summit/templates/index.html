@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Cloud Tech Summit 2026 | 1-Day Technical Conference</title>
+    <meta name="description" content="Official 1-Day Google Cloud Technical Conference schedule, speakers, and talk details.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Background Orbs -->
+    <div class="bg-gradient-orb orb-1"></div>
+    <div class="bg-gradient-orb orb-2"></div>
+    <div class="bg-gradient-orb orb-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="brand">
+                <div class="gcp-logo">
+                    <span class="dot blue"></span>
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">Google Cloud</span>
+                    <span class="brand-sub">Tech Summit 2026</span>
+                </div>
+            </div>
+            <div class="nav-info-badges">
+                <div class="badge date-badge">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    <span>{{ event.date }}</span>
+                </div>
+                <div class="badge location-badge">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <span>{{ event.location.split('&')[0] }}</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="hero-pill">
+                    <span class="pulse-dot"></span>
+                    <span>1-Day Technical Deep Dive &bull; 8 Keynote Talks</span>
+                </div>
+                <h1 class="hero-title">
+                    Building the Future with <span class="text-gradient">Google Cloud</span>
+                </h1>
+                <p class="hero-subtitle">
+                    {{ event.theme }}
+                </p>
+
+                <!-- Key Metrics Bar -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">8</span>
+                        <span class="metric-label">Tech Talks</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">10</span>
+                        <span class="metric-label">Expert Speakers</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">60m</span>
+                        <span class="metric-label">Networking Lunch</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">4</span>
+                        <span class="metric-label">Specialized Tracks</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content & Filters -->
+    <main class="container main-content">
+        
+        <!-- Search and Filter Control Panel -->
+        <section class="filter-panel card">
+            <div class="filter-header">
+                <h2><i class="fa-solid fa-sliders"></i> Conference Schedule & Search</h2>
+                <div class="results-counter" id="resultsCount">Showing 8 of 8 events</div>
+            </div>
+
+            <div class="search-filter-grid">
+                <!-- Search Input -->
+                <div class="search-box-wrapper">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search by Talk Title, Speaker Name, or Keyword..." autocomplete="off">
+                    <button class="clear-search-btn" id="clearSearchBtn" title="Clear Search"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <!-- Category Dropdown Filter for Mobile / Quick Select -->
+                <div class="select-wrapper">
+                    <select id="categorySelect">
+                        <option value="all">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="category-pills" id="categoryPills">
+                <button class="pill-btn active" data-category="all">
+                    <i class="fa-solid fa-border-all"></i> All Talks
+                </button>
+                {% for cat in categories %}
+                <button class="pill-btn" data-category="{{ cat }}">
+                    {% if "AI" in cat %}
+                        <i class="fa-solid fa-brain"></i>
+                    {% elif "Security" in cat %}
+                        <i class="fa-solid fa-shield-halved"></i>
+                    {% elif "Data" in cat %}
+                        <i class="fa-solid fa-database"></i>
+                    {% else %}
+                        <i class="fa-solid fa-code"></i>
+                    {% endif %}
+                    {{ cat }}
+                </button>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Timetable List Container -->
+        <section class="schedule-section">
+            <div class="timeline-container" id="scheduleTimeline">
+                
+                <!-- Talks rendered dynamically by JavaScript or initial Jinja template fallback -->
+                {% for talk in talks %}
+                
+                    <!-- Insert Lunch Break between Talk 4 and Talk 5 -->
+                    {% if loop.index == 5 %}
+                    <div class="lunch-break-card">
+                        <div class="lunch-icon-wrapper">
+                            <i class="fa-solid fa-utensils"></i>
+                        </div>
+                        <div class="lunch-content">
+                            <div class="lunch-badge-row">
+                                <span class="badge lunch-time-badge">
+                                    <i class="fa-regular fa-clock"></i> {{ event.lunch_break.time }} (60 Minutes)
+                                </span>
+                                <span class="badge lunch-location-badge">
+                                    <i class="fa-solid fa-location-arrow"></i> {{ event.lunch_break.location }}
+                                </span>
+                            </div>
+                            <h3 class="lunch-title">{{ event.lunch_break.title }}</h3>
+                            <p class="lunch-desc">{{ event.lunch_break.description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Talk Card -->
+                    <div class="talk-card card" data-id="{{ talk.id }}" data-category="{{ talk.category }}">
+                        <div class="talk-time-col">
+                            <div class="time-badge">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>{{ talk.time }}</span>
+                            </div>
+                            <span class="talk-id-tag">TALK #{{ talk.id }}</span>
+                        </div>
+
+                        <div class="talk-main-col">
+                            <div class="talk-meta-row">
+                                <span class="category-tag tag-{{ talk.category | lower | replace(' & ', '-') | replace(' ', '-') }}">
+                                    {{ talk.category }}
+                                </span>
+                                <span class="room-tag">
+                                    <i class="fa-solid fa-door-open"></i> {{ talk.room }}
+                                </span>
+                            </div>
+
+                            <h3 class="talk-title">{{ talk.title }}</h3>
+                            <p class="talk-description">{{ talk.description }}</p>
+
+                            <div class="talk-footer">
+                                <div class="speakers-list">
+                                    {% for speaker in talk.speakers %}
+                                    <div class="speaker-pill" title="View details for {{ speaker.first_name }} {{ speaker.last_name }}">
+                                        <img src="{{ speaker.avatar }}" alt="{{ speaker.first_name }} {{ speaker.last_name }}" class="speaker-avatar">
+                                        <div class="speaker-info">
+                                            <span class="speaker-name">{{ speaker.first_name }} {{ speaker.last_name }}</span>
+                                            <span class="speaker-role">{{ speaker.role }}, {{ speaker.company }}</span>
+                                        </div>
+                                        <a href="{{ speaker.linkedin }}" target="_blank" rel="noopener noreferrer" class="linkedin-btn" title="LinkedIn Profile of {{ speaker.first_name }} {{ speaker.last_name }}" onclick="event.stopPropagation();">
+                                            <i class="fa-brands fa-linkedin"></i>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button class="btn btn-details" onclick="openTalkModal({{ talk.id }})">
+                                    <span>Details</span> <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <!-- Empty Search State -->
+            <div class="no-results hidden" id="noResults">
+                <i class="fa-solid fa-magnifying-glass-chart empty-icon"></i>
+                <h3>No talks found matching your criteria</h3>
+                <p>Try searching for a different speaker, talk title, or clearing your active category filters.</p>
+                <button class="btn btn-primary" id="resetFiltersBtn">Reset All Filters</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Talk Detail Modal -->
+    <div class="modal-overlay hidden" id="talkModal">
+        <div class="modal-card">
+            <button class="modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-body" id="modalContent">
+                <!-- Content dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-container">
+            <div class="footer-left">
+                <div class="gcp-logo">
+                    <span class="dot blue"></span>
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <p>Google Cloud Tech Summit 2026 &copy; All rights reserved.</p>
+            </div>
+            <div class="footer-right">
+                <span>San Francisco, CA &bull; October 15, 2026</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Data and Scripts -->
+    <script>
+        window.INITIAL_TALKS = {{ talks | tojson }};
+        window.EVENT_INFO = {{ event | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

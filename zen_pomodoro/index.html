@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="forest">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Pomodoro — Mindful Focus & Ambient Productivity</title>
+    <meta name="description" content="A calm, aesthetic Pomodoro timer with procedural ambient soundscapes, task tracking, and focus analytics.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Ambient Glowing Background Orbs -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Application Shell -->
+    <div class="app-container">
+        
+        <!-- Header Bar -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="zen-logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 7v5l3 3"/>
+                        <path d="M7 12a5 5 0 0 1 5-5"/>
+                    </svg>
+                </div>
+                <span class="brand-name">Zen Pomodoro</span>
+            </div>
+
+            <div class="header-actions">
+                <!-- Theme Selector Dropdown -->
+                <div class="theme-picker">
+                    <button class="icon-btn" id="themeBtn" title="Switch Theme">
+                        <i class="fa-solid fa-palette"></i>
+                    </button>
+                    <div class="theme-dropdown hidden" id="themeDropdown">
+                        <div class="theme-option active" data-theme="forest">
+                            <span class="color-dot forest"></span> Calm Forest
+                        </div>
+                        <div class="theme-option" data-theme="sunset">
+                            <span class="color-dot sunset"></span> Sunset Zen
+                        </div>
+                        <div class="theme-option" data-theme="midnight">
+                            <span class="color-dot midnight"></span> Midnight Minimal
+                        </div>
+                        <div class="theme-option" data-theme="latte">
+                            <span class="color-dot latte"></span> Soft Latte
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ambient Audio Panel Toggle -->
+                <button class="icon-btn" id="soundToggleBtn" title="Ambient Soundscapes">
+                    <i class="fa-solid fa-cloud-rain"></i>
+                    <span class="sound-active-badge hidden" id="soundActiveBadge"></span>
+                </button>
+
+                <!-- Stats Dashboard Toggle -->
+                <button class="icon-btn" id="statsBtn" title="Focus Analytics">
+                    <i class="fa-solid fa-chart-line"></i>
+                </button>
+
+                <!-- Settings Gear -->
+                <button class="icon-btn" id="settingsBtn" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="main-layout">
+            
+            <!-- Center Timer Column -->
+            <section class="timer-section">
+                <!-- Mode Selector Pills -->
+                <nav class="mode-nav">
+                    <button class="mode-btn active" data-mode="focus">
+                        <i class="fa-solid fa-brain"></i> Focus
+                    </button>
+                    <button class="mode-btn" data-mode="shortBreak">
+                        <i class="fa-solid fa-mug-hot"></i> Short Break
+                    </button>
+                    <button class="mode-btn" data-mode="longBreak">
+                        <i class="fa-solid fa-couch"></i> Long Break
+                    </button>
+                </nav>
+
+                <!-- SVG Circular Progress Timer -->
+                <div class="timer-display-container">
+                    <svg class="timer-ring-svg" viewBox="0 0 300 300">
+                        <circle class="ring-bg" cx="150" cy="150" r="135"/>
+                        <circle class="ring-progress" id="ringProgress" cx="150" cy="150" r="135"/>
+                    </svg>
+                    
+                    <div class="timer-content">
+                        <span class="timer-time" id="timerTime">25:00</span>
+                        <span class="timer-label" id="timerLabel">Time to focus</span>
+                        
+                        <!-- Active Task Indicator -->
+                        <div class="active-task-pill hidden" id="activeTaskPill">
+                            <i class="fa-solid fa-thumbtack"></i>
+                            <span id="activeTaskTitle">Select a task below</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Controls -->
+                <div class="timer-controls">
+                    <button class="ctrl-btn reset-btn" id="resetBtn" title="Reset Session">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button class="ctrl-btn play-btn" id="playBtn" title="Start Timer (Spacebar)">
+                        <i class="fa-solid fa-play" id="playIcon"></i>
+                    </button>
+                    <button class="ctrl-btn skip-btn" id="skipBtn" title="Skip Session">
+                        <i class="fa-solid fa-forward-step"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Task Management Section -->
+            <section class="tasks-section card">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-list-check"></i> Today's Tasks</h2>
+                    <span class="task-counter" id="taskCounter">0 / 0 Completed</span>
+                </div>
+
+                <!-- Add Task Form -->
+                <form class="add-task-form" id="addTaskForm">
+                    <input type="text" id="taskInput" placeholder="What are you working on?" required autocomplete="off">
+                    <div class="pomo-est-wrapper" title="Estimated Pomodoros">
+                        <i class="fa-solid fa-clock"></i>
+                        <input type="number" id="taskEstInput" min="1" max="10" value="1">
+                    </div>
+                    <button type="submit" class="btn-add-task">
+                        <i class="fa-solid fa-plus"></i> Add Task
+                    </button>
+                </form>
+
+                <!-- Tasks List -->
+                <ul class="tasks-list" id="tasksList">
+                    <!-- Dynamic Task Items -->
+                </ul>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Ambient Sounds Drawer -->
+    <div class="ambient-drawer hidden" id="ambientDrawer">
+        <div class="drawer-header">
+            <h3><i class="fa-solid fa-headphones"></i> Ambient Soundscapes</h3>
+            <button class="close-drawer-btn" id="closeAmbientBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p class="drawer-sub">Procedurally generated soothing background audio powered by Web Audio API.</p>
+        
+        <div class="sounds-grid">
+            <!-- Soft Rain -->
+            <div class="sound-card" data-sound="rain">
+                <div class="sound-info">
+                    <i class="fa-solid fa-cloud-showers-heavy sound-icon"></i>
+                    <span class="sound-name">Soft Rain</span>
+                </div>
+                <div class="sound-controls">
+                    <button class="sound-toggle-btn"><i class="fa-solid fa-play"></i></button>
+                    <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+            </div>
+
+            <!-- Ocean Waves -->
+            <div class="sound-card" data-sound="waves">
+                <div class="sound-info">
+                    <i class="fa-solid fa-water sound-icon"></i>
+                    <span class="sound-name">Ocean Waves</span>
+                </div>
+                <div class="sound-controls">
+                    <button class="sound-toggle-btn"><i class="fa-solid fa-play"></i></button>
+                    <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+            </div>
+
+            <!-- Forest Breeze -->
+            <div class="sound-card" data-sound="forest">
+                <div class="sound-info">
+                    <i class="fa-solid fa-tree sound-icon"></i>
+                    <span class="sound-name">Forest Wind</span>
+                </div>
+                <div class="sound-controls">
+                    <button class="sound-toggle-btn"><i class="fa-solid fa-play"></i></button>
+                    <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.5">
+                </div>
+            </div>
+
+            <!-- 432Hz Focus Tone -->
+            <div class="sound-card" data-sound="focus">
+                <div class="sound-info">
+                    <i class="fa-solid fa-wave-square sound-icon"></i>
+                    <span class="sound-name">432Hz Focus Tone</span>
+                </div>
+                <div class="sound-controls">
+                    <button class="sound-toggle-btn"><i class="fa-solid fa-play"></i></button>
+                    <input type="range" class="volume-slider" min="0" max="1" step="0.05" value="0.4">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div class="modal-overlay hidden" id="statsModal">
+        <div class="modal-card">
+            <button class="modal-close" id="closeStatsBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-body">
+                <h2><i class="fa-solid fa-chart-pie"></i> Productivity Analytics</h2>
+                
+                <div class="stats-overview-grid">
+                    <div class="stat-box">
+                        <span class="stat-num" id="statFocusTime">0m</span>
+                        <span class="stat-lbl">Focus Time Today</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num" id="statCompletedPomos">0</span>
+                        <span class="stat-lbl">Pomodoros Done</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-num" id="statStreak">1 Day</span>
+                        <span class="stat-lbl">Daily Streak</span>
+                    </div>
+                </div>
+
+                <div class="stats-chart-section">
+                    <h3>Focus Distribution</h3>
+                    <div class="bar-chart-container" id="barChartContainer">
+                        <!-- Bars dynamically rendered -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="modal-card">
+            <button class="modal-close" id="closeSettingsBtn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-body">
+                <h2><i class="fa-solid fa-sliders"></i> Timer Preferences</h2>
+                
+                <form id="settingsForm">
+                    <div class="setting-group">
+                        <label>Timer Durations (minutes)</label>
+                        <div class="duration-inputs-grid">
+                            <div class="input-item">
+                                <span>Focus</span>
+                                <input type="number" id="setFocusTime" min="1" max="90" value="25">
+                            </div>
+                            <div class="input-item">
+                                <span>Short Break</span>
+                                <input type="number" id="setShortBreak" min="1" max="30" value="5">
+                            </div>
+                            <div class="input-item">
+                                <span>Long Break</span>
+                                <input type="number" id="setLongBreak" min="1" max="60" value="15">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-row">
+                        <span>Auto-start Breaks</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setAutoBreaks">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <span>Auto-start Focus Sessions</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setAutoFocus">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-save-settings">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/ambient.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSense Music — Sustainable Ambient & Focus Soundscapes</title>
+    <meta name="description" content="Nature-inspired ambient soundscapes, focus music player, and real-time audio spectrum visualizer.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Background Glowing Ambient Orbs -->
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="brand">
+                <div class="eco-logo-icon">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">EcoSense</span>
+                    <span class="brand-sub">Sustainable Audio</span>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search ambient tracks, nature sounds, or artists..." autocomplete="off">
+            </div>
+
+            <!-- Eco Energy Mode Switch -->
+            <div class="eco-mode-bar">
+                <div class="eco-mode-label">
+                    <i class="fa-solid fa-seedling"></i>
+                    <span>Eco Mode</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="ecoSaverToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container main-content">
+        
+        <!-- Hero Visualizer Section -->
+        <section class="visualizer-section card">
+            <div class="visualizer-header">
+                <div class="hero-tag">
+                    <span class="pulse-emerald"></span> Live Audio Spectrum Visualizer
+                </div>
+                <h1 class="hero-title">Harmonizing Nature & Sound</h1>
+                <span class="eco-status-pill" id="ecoEnergyCounter">⚡ Standard High Fidelity Mode</span>
+            </div>
+
+            <!-- Canvas Audio Visualizer -->
+            <div class="canvas-wrapper">
+                <canvas id="audioCanvas"></canvas>
+            </div>
+        </section>
+
+        <!-- Category Pills Filter Bar -->
+        <section class="categories-section">
+            <div class="category-pills" id="categoryPills">
+                <!-- Dynamically populated pills -->
+            </div>
+        </section>
+
+        <!-- Music Track Grid -->
+        <section class="tracks-section">
+            <div class="section-title-row">
+                <h2><i class="fa-solid fa-compact-disc"></i> Curated Soundscapes & Tracks</h2>
+            </div>
+            
+            <div class="track-grid" id="trackGrid">
+                <!-- Track Cards Rendered Here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Sticky Bottom Player Bar -->
+    <div class="player-bar">
+        <div class="player-bar-container">
+            
+            <!-- Currently Playing Track Info -->
+            <div class="player-track-info">
+                <img src="https://images.unsplash.com/photo-1511497584788-876761c1298b?w=400&auto=format&fit=crop&q=80" alt="Now Playing" class="now-playing-cover" id="nowPlayingCover">
+                <div class="now-playing-text">
+                    <span class="now-playing-title" id="nowPlayingTitle">Amazonian Rainforest Symphony</span>
+                    <span class="now-playing-artist" id="nowPlayingArtist">EcoSense Ambient Ensemble</span>
+                    <span class="now-playing-tag" id="nowPlayingEcoTag">🌿 100% Acoustic Nature Recording</span>
+                </div>
+            </div>
+
+            <!-- Playback Controls & Seekbar -->
+            <div class="player-center">
+                <div class="player-buttons">
+                    <button class="ctrl-btn-small" id="shuffleBtn" title="Shuffle"><i class="fa-solid fa-shuffle"></i></button>
+                    <button class="ctrl-btn-small" id="prevBtn" title="Previous Track"><i class="fa-solid fa-backward-step"></i></button>
+                    <button class="play-btn-main" id="playPauseBtn" title="Play / Pause">
+                        <i class="fa-solid fa-play" id="playPauseIcon"></i>
+                    </button>
+                    <button class="ctrl-btn-small" id="nextBtn" title="Next Track"><i class="fa-solid fa-forward-step"></i></button>
+                    <button class="ctrl-btn-small" id="repeatBtn" title="Repeat"><i class="fa-solid fa-repeat"></i></button>
+                </div>
+
+                <!-- Progress Bar & Time Badges -->
+                <div class="progress-container">
+                    <span class="time-stamp" id="currentTime">00:00</span>
+                    <div class="progress-bar-bg" id="progressBar">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    <span class="time-stamp" id="totalTime">03:45</span>
+                </div>
+            </div>
+
+            <!-- Volume & Extra Actions -->
+            <div class="player-right">
+                <button class="ctrl-btn-small" id="muteBtn" title="Mute/Unmute"><i class="fa-solid fa-volume-high"></i></button>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.05" value="0.8">
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/tracks.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
