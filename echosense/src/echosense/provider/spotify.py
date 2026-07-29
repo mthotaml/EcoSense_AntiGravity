@@ -51,6 +51,8 @@ class SpotifyAdapter:
             "client_id": self.client_id,
             "code_verifier": code_verifier
         }
+        if self.client_secret and not self.client_secret.startswith("mock_"):
+            payload["client_secret"] = self.client_secret
         
         try:
             resp = requests.post(url, data=payload, timeout=10)
