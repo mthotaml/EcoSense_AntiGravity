@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetTemporalBtn = document.getElementById('resetTemporalBtn');
     const deleteConsentBtn = document.getElementById('deleteConsentBtn');
 
-    // Pure HTML5 Audio Player Engine (Zero static noise synth)
+    // Pure HTML5 Audio Player Engine
     const audio = new Audio();
     audio.crossOrigin = "anonymous";
     audio.volume = 0.8;
@@ -25,13 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let progressTimer = null;
 
     function playTrackAudio(previewUrl) {
-        if (!previewUrl) {
-            console.log("No audio preview URL provided.");
-            return;
-        }
+        if (!previewUrl) return;
 
-        if (audio.src !== previewUrl) {
-            audio.src = previewUrl;
+        const absoluteUrl = new URL(previewUrl, window.location.origin).href;
+        if (audio.src !== absoluteUrl) {
+            audio.src = absoluteUrl;
         }
 
         const playPromise = audio.play();
@@ -81,13 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
         stopProgressTimer();
         progressTimer = setInterval(() => {
             const currentTime = audio.currentTime || 0;
-            const duration = audio.duration || 240;
+            const duration = audio.duration || 8;
             const progressFill = document.querySelector('.player-progress-fill');
             if (progressFill) {
                 const percent = Math.min((currentTime / duration) * 100, 100);
                 progressFill.style.width = `${percent}%`;
             }
-        }, 500);
+        }, 300);
     }
 
     function stopProgressTimer() {
@@ -157,8 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (titleEl) titleEl.textContent = track.title;
                 if (artistEl) artistEl.textContent = track.artist_name;
                 if (coverEl) coverEl.src = track.cover_url;
+
+                // 3. Update Decision ID
+                if (startRecBtn && data.decision_id) {
+                    startRecBtn.dataset.id = data.decision_id;
+                }
                 
-                // 3. Play New Track Audio Stream
+                // 4. Play New Track Audio Stream
                 if (track.preview_url) {
                     playTrackAudio(track.preview_url);
                 }

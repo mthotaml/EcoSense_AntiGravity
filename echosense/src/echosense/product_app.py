@@ -118,6 +118,22 @@ def read_root(request: Request, db: Session = Depends(get_db)):
     return HTMLResponse(content=html_content)
 
 
+@app.post("/api/settings/spotify")
+def update_spotify_credentials(payload: dict = Body(...)):
+    """Update Spotify Client ID and Client Secret dynamically."""
+    client_id = payload.get("client_id")
+    client_secret = payload.get("client_secret")
+    
+    if client_id:
+        settings.SPOTIFY_CLIENT_ID = client_id.strip()
+        spotify_adapter.client_id = client_id.strip()
+    if client_secret:
+        settings.SPOTIFY_CLIENT_SECRET = client_secret.strip()
+        spotify_adapter.client_secret = client_secret.strip()
+        
+    return {"status": "success", "client_id": settings.SPOTIFY_CLIENT_ID, "has_secret": bool(settings.SPOTIFY_CLIENT_SECRET)}
+
+
 @app.get("/auth/spotify")
 def auth_spotify():
     """Initiate Spotify OAuth Authorization Flow with PKCE."""
@@ -181,7 +197,14 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
     devices = spotify_adapter.get_active_devices("mock_access_token")
     active_device = next((d for d in devices if d["is_active"]), devices[0])
     
-    success = spotify_adapter.play_track("mock_access_token", active_device["id"], "sp_track_101")
+    all_candidates = demo_top_tracks + demo_recent_tracks
+    context = context_resolver.get_live_context()
+    decisions = demo_ranker.rank_candidates(all_candidates, context)
+    
+    target_decision = next((d for d in decisions if d.decision_id == decision_id), None)
+    target_track = target_decision.track if target_decision else all_candidates[0]
+
+    spotify_adapter.play_track("mock_access_token", active_device["id"], target_track.id)
     
     # Record playback outcome
     governance = GovernanceEngine(db)
@@ -197,7 +220,8 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
         "status": "success",
         "playing": True,
         "device": active_device,
-        "decision_id": decision_id
+        "decision_id": decision_id,
+        "now_playing": target_track
     }
 
 
