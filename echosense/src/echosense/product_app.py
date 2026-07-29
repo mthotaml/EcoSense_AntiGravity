@@ -134,18 +134,44 @@ def update_spotify_credentials(payload: dict = Body(...)):
     return {"status": "success", "client_id": settings.SPOTIFY_CLIENT_ID, "has_secret": bool(settings.SPOTIFY_CLIENT_SECRET)}
 
 
+pkce_verifiers = {}
+
 @app.get("/auth/spotify")
-def auth_spotify():
+def auth_spotify(request: Request):
     """Initiate Spotify OAuth Authorization Flow with PKCE."""
+    base_url = str(request.base_url).rstrip("/")
+    redirect_uri = f"{base_url}/auth/spotify/callback"
+    spotify_adapter.redirect_uri = redirect_uri
+    
     state = uuid.uuid4().hex
     auth_url, verifier = spotify_adapter.get_authorization_url(state)
-    return RedirectResponse(auth_url)
+    pkce_verifiers[state] = verifier
+    
+    response = RedirectResponse(auth_url)
+    response.set_cookie(key="spotify_pkce_verifier", value=verifier, httponly=True)
+    return response
 
 
 @app.get("/auth/spotify/callback")
-def auth_spotify_callback(code: str = Query(...), state: str = Query(...), db: Session = Depends(get_db)):
+def auth_spotify_callback(request: Request, code: str = Query(...), state: str = Query(None), db: Session = Depends(get_db)):
     """Handle Spotify OAuth Callback and persist encrypted tokens."""
-    tokens = spotify_adapter.exchange_code_for_tokens(code, "mock_verifier")
+    base_url = str(request.base_url).rstrip("/")
+    spotify_adapter.redirect_uri = f"{base_url}/auth/spotify/callback"
+    
+    verifier = request.cookies.get("spotify_pkce_verifier") or pkce_verifiers.get(state, "mock_verifier")
+    tokens = spotify_adapter.exchange_code_for_tokens(code, verifier)
+    
+    access_token = tokens.get("access_token", "")
+    refresh_token = tokens.get("refresh_token", "")
+
+    # Ingest user tracks from Spotify API using new access token
+    if access_token:
+        try:
+            user_top = spotify_adapter.get_top_tracks(access_token)
+            user_recent = spotify_adapter.get_recent_tracks(access_token)
+            demo_profile.ingest_signals(user_top, user_recent)
+        except Exception as e:
+            print("Error ingesting Spotify tracks:", e)
     
     # Store user with encrypted tokens
     user = db.query(UserRecord).filter(UserRecord.id == "listener_01").first()
@@ -153,8 +179,8 @@ def auth_spotify_callback(code: str = Query(...), state: str = Query(...), db: S
         user = UserRecord(id="listener_01", spotify_display_name="EchoSense Listener", spotify_email="listener@echosense.ai")
         db.add(user)
 
-    user.encrypted_access_token = encrypt_token(tokens.get("access_token", ""))
-    user.encrypted_refresh_token = encrypt_token(tokens.get("refresh_token", ""))
+    user.encrypted_access_token = encrypt_token(access_token)
+    user.encrypted_refresh_token = encrypt_token(refresh_token)
     user.scopes = settings.SPOTIFY_SCOPES
     user.connection_status = "connected"
     user.last_synced_at = datetime.utcnow()
