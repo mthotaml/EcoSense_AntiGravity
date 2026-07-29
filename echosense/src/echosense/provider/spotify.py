@@ -142,7 +142,7 @@ class SpotifyAdapter:
                 album_name="Hurry Up, We're Dreaming",
                 duration_ms=243000,
                 isrc="USM831100001",
-                preview_url="/static/audio/track101.wav",
+                preview_url="/static/audio/track101.mp3",
                 cover_url="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80",
                 category="Deep Focus"
             ),
@@ -154,7 +154,7 @@ class SpotifyAdapter:
                 album_name="Cosmic Echoes",
                 duration_ms=210000,
                 isrc="USSOL2200002",
-                preview_url="/static/audio/track102.wav",
+                preview_url="/static/audio/track102.mp3",
                 cover_url="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80",
                 category="Nature Soundscapes"
             ),
@@ -166,7 +166,7 @@ class SpotifyAdapter:
                 album_name="Organic Chill",
                 duration_ms=185000,
                 isrc="USBOT2200003",
-                preview_url="/static/audio/track103.wav",
+                preview_url="/static/audio/track103.mp3",
                 cover_url="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80",
                 category="Eco Lo-Fi Beats"
             ),
@@ -178,7 +178,7 @@ class SpotifyAdapter:
                 album_name="Cosmic Equilibrium",
                 duration_ms=252000,
                 isrc="USSOL2200005",
-                preview_url="/static/audio/track105.wav",
+                preview_url="/static/audio/track105.mp3",
                 cover_url="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80",
                 category="Deep Focus"
             ),
@@ -190,7 +190,7 @@ class SpotifyAdapter:
                 album_name="Earth Harmonies",
                 duration_ms=225000,
                 isrc="USECO2200006",
-                preview_url="/static/audio/track106.wav",
+                preview_url="/static/audio/track106.mp3",
                 cover_url="https://images.unsplash.com/photo-1511497584788-876761c1298b?w=400&auto=format&fit=crop&q=80",
                 category="Nature Soundscapes"
             )
@@ -223,7 +223,7 @@ class SpotifyAdapter:
                             album_name=album.get("name", "Single"),
                             duration_ms=tr.get("duration_ms", 200000),
                             isrc=external_ids.get("isrc"),
-                            preview_url=tr.get("preview_url") or "/static/audio/track104.wav",
+                            preview_url=tr.get("preview_url") or "/static/audio/track104.mp3",
                             cover_url=cover_url,
                             category="Recently Played"
                         ))
@@ -241,7 +241,7 @@ class SpotifyAdapter:
                 album_name="Sanctuary",
                 duration_ms=310000,
                 isrc="USKYO2200004",
-                preview_url="/static/audio/track104.wav",
+                preview_url="/static/audio/track104.mp3",
                 cover_url="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=400&auto=format&fit=crop&q=80",
                 category="Meditation & Calm"
             ),
@@ -253,7 +253,7 @@ class SpotifyAdapter:
                 album_name="Organic Chill",
                 duration_ms=150000,
                 isrc="USBOT2200007",
-                preview_url="/static/audio/track107.wav",
+                preview_url="/static/audio/track107.mp3",
                 cover_url="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&auto=format&fit=crop&q=80",
                 category="Eco Lo-Fi Beats"
             ),
