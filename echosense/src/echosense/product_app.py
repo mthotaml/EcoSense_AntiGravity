@@ -102,6 +102,11 @@ def read_root(request: Request, db: Session = Depends(get_db)):
 
     pattern = demo_temporal.detect_stable_pattern(context["daypart"])
 
+    # Check user connection state from database
+    user = db.query(UserRecord).filter(UserRecord.id == "listener_01").first()
+    is_connected = bool(user and user.connection_status == "connected")
+    user_name = user.spotify_display_name if (user and user.spotify_display_name) else "EchoSense Listener"
+
     template = templates.get_template("index.html")
     html_content = template.render({
         "request": request,
@@ -111,8 +116,8 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         "context": context,
         "pattern": pattern,
         "profile": demo_profile,
-        "user_name": "EchoSense Listener",
-        "is_connected": True,
+        "user_name": user_name,
+        "is_connected": is_connected,
         "int": int
     })
     return HTMLResponse(content=html_content)

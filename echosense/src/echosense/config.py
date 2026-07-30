@@ -17,7 +17,7 @@ class Settings:
     # Spotify OAuth credentials
     SPOTIFY_CLIENT_ID: str = os.getenv("SPOTIFY_CLIENT_ID", "0e8cdc56698447498f5f855450f62a8d")
     SPOTIFY_CLIENT_SECRET: str = os.getenv("SPOTIFY_CLIENT_SECRET", "mock_spotify_client_secret_echosense")
-    SPOTIFY_REDIRECT_URI: str = os.getenv("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8008/auth/spotify/callback")
+    SPOTIFY_REDIRECT_URI: str = os.getenv("SPOTIFY_REDIRECT_URI", "http://127.0.0.1:8001/auth/spotify/callback")
     SPOTIFY_SCOPES: str = os.getenv(
         "SPOTIFY_SCOPES",
         "user-top-read user-read-recently-played user-read-email user-read-private streaming user-read-playback-state user-modify-playback-state user-library-read user-library-modify playlist-read-private playlist-read-collaborative"
