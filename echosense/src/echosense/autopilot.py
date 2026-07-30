@@ -43,6 +43,20 @@ class MusicDNAAutopilot:
         if needed > 0 and new_decisions:
             self.upcoming_queue.extend(new_decisions[:needed])
 
+        # Fallback replenishment if queue is still under target_size (prevents empty queue)
+        if len(self.upcoming_queue) < target_size:
+            self.history_track_ids.clear()
+            fallback_queued = {d.track.id for d in self.upcoming_queue}
+            fallback_decisions = self.ranker.rank_candidates(
+                candidates=candidates,
+                context_data=context_data,
+                current_track_id=current_track_id,
+                queued_track_ids=fallback_queued
+            )
+            still_needed = target_size - len(self.upcoming_queue)
+            if fallback_decisions:
+                self.upcoming_queue.extend(fallback_decisions[:still_needed])
+
         return self.upcoming_queue[:target_size]
 
     def consume_next(self) -> Optional[RecommendationDecision]:

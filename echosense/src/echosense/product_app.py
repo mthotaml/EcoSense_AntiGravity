@@ -250,10 +250,20 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
     
     all_candidates = demo_top_tracks + demo_recent_tracks
     context = context_resolver.get_live_context()
-    decisions = demo_ranker.rank_candidates(all_candidates, context)
     
-    target_decision = next((d for d in decisions if d.decision_id == decision_id), None)
-    target_track = target_decision.track if target_decision else all_candidates[0]
+    # 1. Search in current Autopilot upcoming queue
+    target_decision = next((d for d in demo_autopilot.upcoming_queue if d.decision_id == decision_id), None)
+    
+    # 2. Search by decision_id or track.id in ranked candidates
+    if not target_decision:
+        decisions = demo_ranker.rank_candidates(all_candidates, context)
+        target_decision = next((d for d in decisions if d.decision_id == decision_id or d.track.id == decision_id), None)
+    
+    if target_decision:
+        target_track = target_decision.track
+    else:
+        # 3. Direct lookup in candidate track catalog by ID
+        target_track = next((t for t in all_candidates if t.id == decision_id), all_candidates[0])
 
     spotify_adapter.play_track("mock_access_token", active_device["id"], target_track.id)
     
