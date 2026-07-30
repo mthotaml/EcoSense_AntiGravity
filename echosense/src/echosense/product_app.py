@@ -82,9 +82,28 @@ def healthz():
     }
 
 
-def serialize_queue_page(page: int = 1, page_size: int = 5):
+def get_user_candidates(db: Session = None) -> List[Track]:
+    """Retrieve active candidate catalog. When connected to Spotify, uses REAL Spotify tracks and eliminates seed profiles."""
+    if db:
+        user = db.query(UserRecord).filter(UserRecord.id == "listener_01").first()
+        if user and user.connection_status == "connected" and user.encrypted_access_token:
+            try:
+                token = decrypt_token(user.encrypted_access_token)
+                if token and not token.startswith("mock_"):
+                    real_top = spotify_adapter.get_top_tracks(token)
+                    real_recent = spotify_adapter.get_recent_tracks(token)
+                    if real_top or real_recent:
+                        demo_profile.clear_profile()
+                        demo_profile.ingest_signals(real_top, real_recent)
+                        return real_top + real_recent
+            except Exception as e:
+                print("Error retrieving real user candidates:", e)
+    return demo_top_tracks + demo_recent_tracks
+
+
+def serialize_queue_page(page: int = 1, page_size: int = 5, db: Session = None):
     """Helper to maintain continuous queue and return paginated decisions."""
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     context = context_resolver.get_live_context()
     demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
     
@@ -120,7 +139,7 @@ def serialize_queue_page(page: int = 1, page_size: int = 5):
 def read_root(request: Request, db: Session = Depends(get_db)):
     """Render Primary EchoSense Listener Interface."""
     context = context_resolver.get_live_context()
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     
     # Generate recommendations & Autopilot continuous queue
     decisions = demo_ranker.rank_candidates(all_candidates, context)
@@ -178,34 +197,34 @@ def read_root(request: Request, db: Session = Depends(get_db)):
 
 
 @app.post("/api/autopilot/toggle")
-def toggle_autopilot_mode(enabled: bool = Body(..., embed=True)):
+def toggle_autopilot_mode(enabled: bool = Body(..., embed=True), db: Session = Depends(get_db)):
     """Toggle between Music DNA Autopilot Queue and Direct Spotify Streaming Mode."""
     demo_autopilot.is_enabled = enabled
-    return serialize_queue_page(page=1, page_size=5)
+    return serialize_queue_page(page=1, page_size=5, db=db)
 
 
 @app.post("/api/context/toggle")
-def toggle_live_context_mode(enabled: bool = Body(..., embed=True)):
+def toggle_live_context_mode(enabled: bool = Body(..., embed=True), db: Session = Depends(get_db)):
     """Toggle whether live context resolution is factored into DNA queue ranking."""
     demo_ranker.use_live_context = enabled
     demo_autopilot.upcoming_queue = []  # Force fresh queue recalculation
-    return serialize_queue_page(page=1, page_size=5)
+    return serialize_queue_page(page=1, page_size=5, db=db)
 
 
 @app.get("/api/autopilot")
-def get_autopilot_queue(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1, le=20)):
+def get_autopilot_queue(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1, le=20), db: Session = Depends(get_db)):
     """API endpoint to fetch paginated Autopilot queue."""
-    return serialize_queue_page(page, page_size)
+    return serialize_queue_page(page, page_size, db=db)
 
 
 @app.post("/api/autopilot/load_more")
 def load_more_autopilot_tracks(db: Session = Depends(get_db)):
     """Dynamically rank and append 5 fresh relevant DNA tracks to the continuous queue."""
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     context = context_resolver.get_live_context()
     current_size = len(demo_autopilot.upcoming_queue)
     demo_autopilot.maintain_queue(all_candidates, context, target_size=current_size + 5)
-    return serialize_queue_page(page=1, page_size=5)
+    return serialize_queue_page(page=1, page_size=5, db=db)
 
 
 @app.post("/api/settings/spotify")
@@ -320,10 +339,10 @@ def auth_spotify_callback(request: Request, code: str = Query(...), state: str =
 
 
 @app.get("/api/recommendations")
-def get_recommendations():
+def get_recommendations(db: Session = Depends(get_db)):
     """API endpoint to fetch current recommendations and factor scores."""
     context = context_resolver.get_live_context()
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     decisions = demo_ranker.rank_candidates(all_candidates, context)
 
     return {
@@ -334,26 +353,13 @@ def get_recommendations():
     }
 
 
-@app.get("/api/autopilot")
-def get_autopilot_queue():
-    """API endpoint to fetch 5-track Autopilot queue preview."""
-    context = context_resolver.get_live_context()
-    all_candidates = demo_top_tracks + demo_recent_tracks
-    queue = demo_autopilot.maintain_queue(all_candidates, context)
-
-    return {
-        "status": "success",
-        "queue": queue
-    }
-
-
 @app.post("/api/play")
 def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = Depends(get_db)):
     """Start continuous audible playback for decision."""
     devices = spotify_adapter.get_active_devices("mock_access_token")
     active_device = next((d for d in devices if d["is_active"]), devices[0])
     
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     context = context_resolver.get_live_context()
     
     # 1. Search in current Autopilot upcoming queue
@@ -371,7 +377,7 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
 
     # Replenish queue for continuous autopilot stream
     demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
-    page_data = serialize_queue_page(page=1, page_size=5)
+    page_data = serialize_queue_page(page=1, page_size=5, db=db)
 
     spotify_adapter.play_track("mock_access_token", active_device["id"], target_track.id)
     
@@ -412,7 +418,7 @@ def skip_current_track(db: Session = Depends(get_db)):
 
     # Consume next track from Autopilot
     next_decision = demo_autopilot.consume_next()
-    all_candidates = demo_top_tracks + demo_recent_tracks
+    all_candidates = get_user_candidates(db)
     context = context_resolver.get_live_context()
 
     if not next_decision:

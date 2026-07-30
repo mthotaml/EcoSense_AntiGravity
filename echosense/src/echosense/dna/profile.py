@@ -31,3 +31,10 @@ class MusicDNAProfile:
         
         # Weighted average of artist affinity and category fit
         return (artist_score * 0.6) + (category_score * 0.4)
+
+    def clear_profile(self):
+        """Clear all ingested taste vectors to eliminate seed profile data."""
+        self.artist_affinities.clear()
+        self.genre_affinities.clear()
+        self.evidence_count = 0
+
