@@ -387,6 +387,9 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
     
     # Record playback outcome
     governance = GovernanceEngine(db)
+    if target_decision:
+        governance.log_decision("listener_01", target_decision)
+
     governance.record_outcome_idempotent(
         outcome_id=f"out_{uuid.uuid4().hex[:12]}",
         user_id="listener_01",

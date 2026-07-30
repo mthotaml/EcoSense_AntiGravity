@@ -15,7 +15,11 @@ class GovernanceEngine:
         self.db = db_session
 
     def log_decision(self, user_id: str, decision: RecommendationDecision) -> DecisionRecord:
-        """Persist recommendation decision provenance before playback (GR-10, Requirement 9.1)."""
+        """Persist recommendation decision provenance idempotently before playback (GR-10, Requirement 9.1)."""
+        existing = self.db.query(DecisionRecord).filter(DecisionRecord.decision_id == decision.decision_id).first()
+        if existing:
+            return existing
+
         record = DecisionRecord(
             decision_id=decision.decision_id,
             user_id=user_id,
@@ -34,9 +38,13 @@ class GovernanceEngine:
             policy_version="1.0.0",
             created_at=datetime.utcnow()
         )
-        self.db.add(record)
-        self.db.commit()
-        return record
+        try:
+            self.db.add(record)
+            self.db.commit()
+            return record
+        except Exception:
+            self.db.rollback()
+            return self.db.query(DecisionRecord).filter(DecisionRecord.decision_id == decision.decision_id).first()
 
     def record_outcome_idempotent(
         self,
