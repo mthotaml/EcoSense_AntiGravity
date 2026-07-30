@@ -102,6 +102,45 @@ document.addEventListener('DOMContentLoaded', () => {
         handleSkip();
     });
 
+    // Unified UI & Audio Sync Helper
+    function syncNowPlayingUI(data) {
+        if (!data || !data.now_playing) return;
+        const track = data.now_playing;
+
+        // 1. Update Recommendation Card DOM
+        const cardTitle = document.querySelector('.rec-track-title');
+        const cardArtist = document.querySelector('.rec-artist-name');
+        const cardCover = document.querySelector('.rec-cover-img');
+        const cardCategory = document.querySelector('.rec-category-tag');
+        const cardReason = document.querySelector('.reason-text');
+
+        if (cardTitle) cardTitle.textContent = track.title;
+        if (cardArtist) cardArtist.innerHTML = `${track.artist_name} &bull; <em>${track.album_name}</em>`;
+        if (cardCover) cardCover.src = track.cover_url;
+        if (cardCategory) cardCategory.textContent = track.category;
+        if (cardReason) cardReason.textContent = `Switched via Autopilot: ${track.title} by ${track.artist_name}`;
+
+        // 2. Update Player Bar DOM
+        const titleEl = document.getElementById('playerTitle');
+        const artistEl = document.getElementById('playerArtist');
+        const coverEl = document.getElementById('playerCover');
+        if (titleEl) titleEl.textContent = track.title;
+        if (artistEl) artistEl.textContent = track.artist_name;
+        if (coverEl) coverEl.src = track.cover_url;
+
+        // 3. Play audio preview
+        if (track.preview_url) {
+            playTrackAudio(track.preview_url);
+        }
+
+        // 4. Update Autopilot queue table & pagination bar
+        if (data.autopilot_queue && data.autopilot_queue.length > 0) {
+            const offset = data.page ? (data.page - 1) * 5 : 0;
+            renderAutopilotQueueTable(data.autopilot_queue, offset);
+            updatePaginationControls(data);
+        }
+    }
+
     // Play Recommendation Button
     if (startRecBtn) {
         startRecBtn.addEventListener('click', async () => {
@@ -113,8 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ decision_id: decisionId })
                 });
                 const data = await res.json();
-                const previewUrl = (data.now_playing && data.now_playing.preview_url) ? data.now_playing.preview_url : null;
-                toggleAudioPlayback(previewUrl);
+                syncNowPlayingUI(data);
             } catch (e) {
                 console.error('Play error:', e);
             }
@@ -137,42 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ decision_id: decisionId })
             });
             const data = await res.json();
-            if (data.now_playing) {
-                const track = data.now_playing;
-                
-                // 1. Update Recommendation Card DOM
-                const cardTitle = document.querySelector('.rec-track-title');
-                const cardArtist = document.querySelector('.rec-artist-name');
-                const cardCover = document.querySelector('.rec-cover-img');
-                const cardCategory = document.querySelector('.rec-category-tag');
-                const cardReason = document.querySelector('.reason-text');
-
-                if (cardTitle) cardTitle.textContent = track.title;
-                if (cardArtist) cardArtist.innerHTML = `${track.artist_name} &bull; <em>${track.album_name}</em>`;
-                if (cardCover) cardCover.src = track.cover_url;
-                if (cardCategory) cardCategory.textContent = track.category;
-                if (cardReason) cardReason.textContent = `Selected via Play Now: ${track.title} by ${track.artist_name}`;
-
-                // 2. Update Player Bar DOM
-                const titleEl = document.getElementById('playerTitle');
-                const artistEl = document.getElementById('playerArtist');
-                const coverEl = document.getElementById('playerCover');
-                if (titleEl) titleEl.textContent = track.title;
-                if (artistEl) artistEl.textContent = track.artist_name;
-                if (coverEl) coverEl.src = track.cover_url;
-
-                // 3. Play audio
-                if (track.preview_url) {
-                    playTrackAudio(track.preview_url);
-                }
-
-                // 4. Dynamic Continuous Autopilot Queue Table Re-render & Pagination Sync
-                if (data.autopilot_queue && data.autopilot_queue.length > 0) {
-                    const offset = data.page ? (data.page - 1) * 5 : 0;
-                    renderAutopilotQueueTable(data.autopilot_queue, offset);
-                    updatePaginationControls(data);
-                }
-            }
+            syncNowPlayingUI(data);
         } catch (e) {
             console.error('Play Now error:', e);
         }
@@ -390,45 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             
             if (data.status === 'success' && data.now_playing) {
-                const track = data.now_playing;
-                
-                // 1. Update Card DOM Elements
-                const cardTitle = document.querySelector('.rec-track-title');
-                const cardArtist = document.querySelector('.rec-artist-name');
-                const cardCover = document.querySelector('.rec-cover-img');
-                const cardCategory = document.querySelector('.rec-category-tag');
-                const cardReason = document.querySelector('.reason-text');
-
-                if (cardTitle) cardTitle.textContent = track.title;
-                if (cardArtist) cardArtist.innerHTML = `${track.artist_name} &bull; <em>${track.album_name}</em>`;
-                if (cardCover) cardCover.src = track.cover_url;
-                if (cardCategory) cardCategory.textContent = track.category;
-                if (cardReason) cardReason.textContent = `Switched via Autopilot: ${track.title} by ${track.artist_name}`;
-
-                // 2. Update Bottom Player Bar DOM Elements
-                const titleEl = document.getElementById('playerTitle');
-                const artistEl = document.getElementById('playerArtist');
-                const coverEl = document.getElementById('playerCover');
-                if (titleEl) titleEl.textContent = track.title;
-                if (artistEl) artistEl.textContent = track.artist_name;
-                if (coverEl) coverEl.src = track.cover_url;
-
-                // 3. Update Decision ID
                 if (startRecBtn && data.decision_id) {
                     startRecBtn.dataset.id = data.decision_id;
                 }
-                
-                // 4. Play New Track Audio Stream
-                if (track.preview_url) {
-                    playTrackAudio(track.preview_url);
-                }
-
-                // 5. Dynamic Continuous Autopilot Queue Table Re-render
-                if (data.autopilot_queue && data.autopilot_queue.length > 0) {
-                    const offset = data.page ? (data.page - 1) * 5 : 0;
-                    renderAutopilotQueueTable(data.autopilot_queue, offset);
-                    updatePaginationControls(data);
-                }
+                syncNowPlayingUI(data);
             }
         } catch (e) {
             console.error('Skip error:', e);
@@ -520,6 +488,73 @@ document.addEventListener('DOMContentLoaded', () => {
         disconnectBtn.addEventListener('click', async () => {
             await fetch('/api/disconnect', { method: 'POST' });
             window.location.reload();
+        });
+    }
+
+    // Info Icon Modal Handlers
+    const infoModal = document.getElementById('infoModal');
+    const closeInfoModal = document.getElementById('closeInfoModal');
+    const infoModalTitle = document.getElementById('infoModalTitle');
+    const infoModalBody = document.getElementById('infoModalBody');
+
+    const infoModalContentMap = {
+        'dna': {
+            title: '<i class="fa-solid fa-dna" style="color: #1ed760; margin-right: 8px;"></i> Music DNA Affinity',
+            body: `<p><strong>Music DNA Affinity</strong> measures how closely a track matches your long-term musical taste vector built from your Spotify library.</p>
+                <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.08);">
+                    <strong style="color: #1ed760;">Calculation Formula:</strong><br>
+                    <code style="color: #64b5f6; font-size: 0.9rem;">DNA Affinity = (0.60 × Artist Affinity) + (0.40 × Category Fit)</code>
+                </div>
+                <ul style="padding-left: 20px; margin: 0 0 16px 0;">
+                    <li><strong>Artist Affinity (60% weight)</strong>: Base score of 0.85 for your top artists on Spotify, boosted by +0.10 for recent plays (up to 1.0).</li>
+                    <li><strong>Category/Genre Fit (40% weight)</strong>: Match score against your primary listened categories (e.g. Deep Focus, Nature Soundscapes, Eco Lo-Fi Beats).</li>
+                </ul>`
+        },
+        'context': {
+            title: '<i class="fa-solid fa-cloud-sun" style="color: #1ed760; margin-right: 8px;"></i> Live Context Fit',
+            body: `<p><strong>Live Context Fit</strong> evaluates real-time environmental context signals (daypart, weather, road setting, and current activity).</p>
+                <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.08);">
+                    <strong style="color: #1ed760;">Context Policy Cap:</strong><br>
+                    <code style="color: #64b5f6; font-size: 0.9rem;">Live Context Fit is capped at max 35% (0.35) of total candidate score</code>
+                </div>`
+        },
+        'preference': {
+            title: '<i class="fa-solid fa-brain" style="color: #1ed760; margin-right: 8px;"></i> Learned Preference',
+            body: `<p><strong>Learned Preference</strong> applies bounded score adjustments (-0.20 to +0.20) learned dynamically from your completed plays and skips in similar contexts.</p>`
+        },
+        'diversity': {
+            title: '<i class="fa-solid fa-shield-halved" style="color: #1ed760; margin-right: 8px;"></i> Diversity Guard',
+            body: `<p><strong>Diversity Guard</strong> protects against artist fatigue. Max 2 tracks per artist are permitted in the queue preview, with non-adjacent artist bonuses (+0.05).</p>`
+        }
+    };
+
+    document.querySelectorAll('.info-icon').forEach(icon => {
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const text = icon.getAttribute('title') || icon.getAttribute('aria-label') || '';
+            let key = 'dna';
+            if (text.includes('context')) key = 'context';
+            else if (text.includes('preference')) key = 'preference';
+            else if (text.includes('guard')) key = 'diversity';
+
+            const modalData = infoModalContentMap[key] || infoModalContentMap['dna'];
+            if (infoModalTitle) infoModalTitle.innerHTML = modalData.title;
+            if (infoModalBody) infoModalBody.innerHTML = modalData.body;
+            if (infoModal) infoModal.style.display = 'flex';
+        });
+    });
+
+    if (closeInfoModal) {
+        closeInfoModal.addEventListener('click', () => {
+            if (infoModal) infoModal.style.display = 'none';
+        });
+    }
+
+    if (infoModal) {
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                infoModal.style.display = 'none';
+            }
         });
     }
 });

@@ -368,14 +368,18 @@ def play_recommendation(decision_id: str = Body(..., embed=True), db: Session = 
     all_candidates = get_user_candidates(db)
     context = context_resolver.get_live_context()
     
-    # 1. Search in current Autopilot upcoming queue
-    target_decision = next((d for d in demo_autopilot.upcoming_queue if d.decision_id == decision_id), None)
+    # 1. Search in current Autopilot upcoming queue by decision_id or track.id
+    target_decision = next((d for d in demo_autopilot.upcoming_queue if d.decision_id == decision_id or d.track.id == decision_id), None)
     
-    # 2. Search by decision_id or track.id in ranked candidates
+    # 2. Search in ranked decisions over active candidates
+    if not target_decision:
+        ranked = demo_ranker.rank_candidates(all_candidates, context)
+        target_decision = next((d for d in ranked if d.decision_id == decision_id or d.track.id == decision_id), None)
+
     if target_decision:
         target_track = target_decision.track
     else:
-        target_track = next((t for t in all_candidates if t.id == decision_id), all_candidates[0])
+        target_track = next((t for t in all_candidates if t.id == decision_id or t.isrc_or_slug == decision_id), all_candidates[0])
 
     if target_decision and target_decision in demo_autopilot.upcoming_queue:
         demo_autopilot.upcoming_queue.remove(target_decision)

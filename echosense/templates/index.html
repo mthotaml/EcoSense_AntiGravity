@@ -385,6 +385,27 @@
 
     </div>
 
+    <!-- Info Modal for Music DNA & Factor Calculations -->
+    <div id="infoModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+        <div class="modal-card" style="background: #18181c; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; max-width: 580px; width: 100%; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); color: #e0e0e0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px;">
+                <h3 id="infoModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff;"><i class="fa-solid fa-dna" style="color: #1ed760; margin-right: 8px;"></i> Music DNA Affinity</h3>
+                <button id="closeInfoModal" style="background: transparent; border: none; color: #a0a0a0; font-size: 1.4rem; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="infoModalBody" style="font-size: 0.92rem; line-height: 1.6; color: #ccc;">
+                <p><strong>Music DNA Affinity</strong> measures how closely a track matches your long-term musical taste vector built from your Spotify library.</p>
+                <div style="background: rgba(255,255,255,0.04); padding: 14px; border-radius: 10px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.08);">
+                    <strong style="color: #1ed760;">Calculation Formula:</strong><br>
+                    <code style="color: #64b5f6; font-size: 0.9rem;">DNA Affinity = (0.60 × Artist Affinity) + (0.40 × Category Fit)</code>
+                </div>
+                <ul style="padding-left: 20px; margin: 0 0 16px 0;">
+                    <li><strong>Artist Affinity (60% weight)</strong>: Base score of 0.85 for your top artists on Spotify, boosted by +0.10 for recent plays (up to 1.0).</li>
+                    <li><strong>Category/Genre Fit (40% weight)</strong>: Match score against your primary listened categories (e.g. Deep Focus, Nature Soundscapes, Eco Lo-Fi Beats).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- Application JavaScript -->
     <script src="/static/js/spotify_sdk.js?v=2.0.0"></script>
     <script src="/static/js/app.js?v=2.0.0"></script>
