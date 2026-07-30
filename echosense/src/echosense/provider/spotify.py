@@ -134,15 +134,19 @@ class SpotifyAdapter:
                         artist_id = artists[0]["id"] if artists else "unknown"
                         external_ids = item.get("external_ids", {})
                         
+                        track_id = item.get("id") or f"top_{len(tracks)}"
+                        real_preview = item.get("preview_url")
+                        audio_url = real_preview if real_preview else f"/static/audio/track{(abs(hash(track_id)) % 8) + 101}.mp3"
+
                         tracks.append(Track(
-                            id=item.get("id"),
+                            id=track_id,
                             title=item.get("name"),
                             artist_name=artist_name,
                             artist_id=artist_id,
                             album_name=album.get("name", "Single"),
                             duration_ms=item.get("duration_ms", 200000),
                             isrc=external_ids.get("isrc"),
-                            preview_url=item.get("preview_url") or "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
+                            preview_url=audio_url,
                             cover_url=cover_url,
                             category="Spotify Top"
                         ))
@@ -233,15 +237,19 @@ class SpotifyAdapter:
                         artist_id = artists[0]["id"] if artists else "unknown"
                         external_ids = tr.get("external_ids", {})
                         
+                        track_id = tr.get("id") or f"rec_{len(tracks)}"
+                        real_preview = tr.get("preview_url")
+                        audio_url = real_preview if real_preview else f"/static/audio/track{(abs(hash(track_id)) % 8) + 101}.mp3"
+
                         tracks.append(Track(
-                            id=tr.get("id"),
+                            id=track_id,
                             title=tr.get("name"),
                             artist_name=artist_name,
                             artist_id=artist_id,
                             album_name=album.get("name", "Single"),
                             duration_ms=tr.get("duration_ms", 200000),
                             isrc=external_ids.get("isrc"),
-                            preview_url=tr.get("preview_url") or "/static/audio/track104.mp3",
+                            preview_url=audio_url,
                             cover_url=cover_url,
                             category="Recently Played"
                         ))
