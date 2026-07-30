@@ -183,10 +183,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: {{ int(dec.factors.dna_affinity*100) }}%;"></span></span> {{ int(dec.factors.dna_affinity*100) }}%</td>
-                                <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: {{ int(dec.factors.live_context_fit*100) }}%;"></span></span> {{ int(dec.factors.live_context_fit*100) }}%</td>
-                                <td><span class="score-pill">+{{ int(dec.factors.learned_preference*100) }}%</span></td>
-                                <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> {{ int(dec.factors.diversity_guard*100) }}%</span></td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: {% if dec.factors %}{{ int(dec.factors.dna_affinity*100) }}{% else %}100{% endif %}%;"></span></span> {% if dec.factors %}{{ int(dec.factors.dna_affinity*100) }}{% else %}100{% endif %}%</td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: {% if dec.factors %}{{ int(dec.factors.live_context_fit*100) }}{% else %}100{% endif %}%;"></span></span> {% if dec.factors %}{{ int(dec.factors.live_context_fit*100) }}{% else %}100{% endif %}%</td>
+                                <td><span class="score-pill">+{% if dec.factors %}{{ int(dec.factors.learned_preference*100) }}{% else %}0{% endif %}%</span></td>
+                                <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> {% if dec.factors %}{{ int(dec.factors.diversity_guard*100) }}{% else %}100{% endif %}%</span></td>
                                 <td>
                                     <div style="font-size: 0.82rem; color: #d0d0d0; max-width: 280px; line-height: 1.35;">
                                         <i class="fa-solid fa-sparkles" style="color: #1ed760; margin-right: 4px;"></i>

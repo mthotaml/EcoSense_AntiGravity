@@ -4,7 +4,7 @@ Maintains 5 distinct tracks ahead, prevents duplicates, & handles queue replenis
 """
 
 from typing import List, Set, Optional
-from echosense.provider.models import Track, RecommendationDecision
+from echosense.provider.models import Track, RecommendationDecision, FactorScore
 from echosense.dna.ranker import ContextualRanker
 
 class MusicDNAAutopilot:
@@ -34,7 +34,12 @@ class MusicDNAAutopilot:
                     track=track,
                     confidence=1.0,
                     why_now="Direct Spotify Streaming • DNA Autopilot OFF",
-                    factors=None,
+                    factors=FactorScore(
+                        dna_affinity=1.0,
+                        live_context_fit=1.0,
+                        learned_preference=0.0,
+                        diversity_guard=1.0
+                    ),
                     context_summary="Direct Spotify Stream"
                 ))
             return direct_decisions
