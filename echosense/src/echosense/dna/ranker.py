@@ -13,7 +13,7 @@ class ContextualRanker:
     def __init__(self, dna_profile: MusicDNAProfile):
         self.profile = dna_profile
         self.disliked_track_ids: Set[str] = set()
-        self.use_live_context: bool = True
+        self.use_live_context: bool = False
 
     def add_disliked_track(self, track_id: str):
         """Record explicit negative feedback to block candidate."""

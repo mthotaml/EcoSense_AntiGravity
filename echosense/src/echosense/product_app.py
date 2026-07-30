@@ -146,8 +146,8 @@ def read_root(request: Request, db: Session = Depends(get_db)):
     demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
     page_items, current_page, page_size, total_pages, total_items = demo_autopilot.get_paginated_queue(page=1, page_size=5)
     
-    current_pick = decisions[0] if decisions else None
-    next_pick = page_items[0] if page_items else None
+    current_pick = page_items[0] if page_items else (decisions[0] if decisions else None)
+    next_pick = page_items[1] if len(page_items) > 1 else None
     
     # Record decision provenance
     governance = GovernanceEngine(db)
