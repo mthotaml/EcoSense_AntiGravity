@@ -130,9 +130,38 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         "profile": demo_profile,
         "user_name": user_name,
         "is_connected": is_connected,
+        "autopilot_enabled": demo_autopilot.is_enabled,
         "int": int
     })
     return HTMLResponse(content=html_content)
+
+
+@app.post("/api/autopilot/toggle")
+def toggle_autopilot_mode(enabled: bool = Body(..., embed=True)):
+    """Toggle between Music DNA Autopilot Queue and Direct Spotify Streaming Mode."""
+    demo_autopilot.is_enabled = enabled
+    all_candidates = demo_top_tracks + demo_recent_tracks
+    context = context_resolver.get_live_context()
+    updated_queue = demo_autopilot.maintain_queue(all_candidates, context)
+    return {
+        "status": "success",
+        "enabled": demo_autopilot.is_enabled,
+        "autopilot_queue": [
+            {
+                "decision_id": d.decision_id,
+                "track": d.track,
+                "confidence": d.confidence,
+                "why_now": d.why_now,
+                "factors": {
+                    "dna_affinity": d.factors.dna_affinity if d.factors else 1.0,
+                    "live_context_fit": d.factors.live_context_fit if d.factors else 1.0,
+                    "learned_preference": d.factors.learned_preference if d.factors else 0.0,
+                    "diversity_guard": d.factors.diversity_guard if d.factors else 1.0
+                } if d.factors else None
+            }
+            for d in updated_queue
+        ]
+    }
 
 
 @app.post("/api/settings/spotify")

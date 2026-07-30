@@ -12,6 +12,7 @@ class MusicDNAAutopilot:
         self.ranker = ranker
         self.upcoming_queue: List[RecommendationDecision] = []
         self.history_track_ids: Set[str] = set()
+        self.is_enabled: bool = True
 
     def maintain_queue(
         self,
@@ -22,8 +23,22 @@ class MusicDNAAutopilot:
     ) -> List[RecommendationDecision]:
         """
         Maintain 5 distinct tracks ahead in the Autopilot queue (FR-10, AC-AUTO-02).
-        Prevents already played or queued tracks from re-entering (AC-AUTO-05).
+        If is_enabled is False, streams tracks directly from connected Spotify service.
         """
+        if not self.is_enabled:
+            # Direct Spotify Mode: bypass DNA queue ranking
+            direct_decisions = []
+            for track in candidates[:target_size]:
+                direct_decisions.append(RecommendationDecision(
+                    decision_id=f"direct_{track.id}",
+                    track=track,
+                    confidence=1.0,
+                    why_now="Direct Spotify Streaming • DNA Autopilot OFF",
+                    factors=None,
+                    context_summary="Direct Spotify Stream"
+                ))
+            return direct_decisions
+
         if current_track_id:
             self.history_track_ids.add(current_track_id)
 

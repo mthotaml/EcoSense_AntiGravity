@@ -110,12 +110,24 @@
 
             <!-- 5. Music DNA Autopilot & Factor Comparison -->
             <section class="autopilot-section card">
-                <div class="section-header-row">
+                <div class="section-header-row" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <h2><i class="fa-solid fa-compass"></i> Continuous Music DNA Autopilot</h2>
                         <p class="section-sub">EchoSense maintains 5 distinct tracks ahead. Click information icons for factor definitions.</p>
                     </div>
-                    <span class="autopilot-active-tag"><span class="pulse-dot"></span> Autopilot Active</span>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <label style="display: flex; gap: 8px; align-items: center; cursor: pointer; font-size: 0.9rem; color: #e0e0e0;">
+                            <input type="checkbox" id="autopilotToggle" {% if autopilot_enabled %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #1ed760;">
+                            <strong>DNA Autopilot Queue</strong>
+                        </label>
+                        <span class="autopilot-active-tag" id="autopilotStatusTag">
+                            {% if autopilot_enabled %}
+                                <span class="pulse-dot"></span> Autopilot Active
+                            {% else %}
+                                <span style="background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; border: 1px solid rgba(255, 193, 7, 0.4);"><i class="fa-brands fa-spotify"></i> Direct Spotify Mode (OFF)</span>
+                            {% endif %}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Factor Comparison Table -->

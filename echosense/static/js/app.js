@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainPlayIcon = document.getElementById('mainPlayIcon');
     const disconnectBtn = document.getElementById('disconnectBtn');
     const connectSpotifyBtn = document.getElementById('connectSpotifyBtn');
+    const autopilotToggle = document.getElementById('autopilotToggle');
+    const autopilotStatusTag = document.getElementById('autopilotStatusTag');
 
     const correctionForm = document.getElementById('correctionForm');
     const correctedInput = document.getElementById('correctedInput');
@@ -178,6 +180,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     attachPlayNowListeners();
 
+    function renderAutopilotQueueTable(queue) {
+        const tbody = document.getElementById('autopilotTableBody');
+        if (!tbody) return;
+
+        tbody.innerHTML = queue.map((dec, idx) => {
+            const dnaVal = dec.factors ? Math.round(dec.factors.dna_affinity * 100) : 100;
+            const ctxVal = dec.factors ? Math.round(dec.factors.live_context_fit * 100) : 100;
+            const prefVal = dec.factors ? Math.round(dec.factors.learned_preference * 100) : 0;
+            const divVal = dec.factors ? Math.round(dec.factors.diversity_guard * 100) : 100;
+
+            return `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>
+                        <div class="table-track-cell">
+                            <img src="${dec.track.cover_url}" alt="" class="table-thumb">
+                            <div>
+                                <strong class="table-track-title">${dec.track.title}</strong>
+                                <span class="table-artist">${dec.track.artist_name}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: ${dnaVal}%;"></span></span> ${dnaVal}%</td>
+                    <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: ${ctxVal}%;"></span></span> ${ctxVal}%</td>
+                    <td><span class="score-pill">+${prefVal}%</span></td>
+                    <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> ${divVal}%</span></td>
+                    <td>
+                        <div style="font-size: 0.82rem; color: #d0d0d0; max-width: 280px; line-height: 1.35;">
+                            <i class="fa-solid fa-sparkles" style="color: #1ed760; margin-right: 4px;"></i>
+                            ${dec.why_now}
+                        </div>
+                    </td>
+                    <td><button class="btn-play-now" data-id="${dec.decision_id}">Play now</button></td>
+                </tr>
+            `;
+        }).join('');
+        
+        attachPlayNowListeners();
+    }
+
+    // Autopilot Queue ON / OFF Toggle
+    if (autopilotToggle) {
+        autopilotToggle.addEventListener('change', async () => {
+            const enabled = autopilotToggle.checked;
+            try {
+                const res = await fetch('/api/autopilot/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: enabled })
+                });
+                const data = await res.json();
+                
+                if (autopilotStatusTag) {
+                    autopilotStatusTag.innerHTML = enabled
+                        ? `<span class="pulse-dot"></span> Autopilot Active`
+                        : `<span style="background: rgba(255, 193, 7, 0.2); color: #ffc107; padding: 6px 12px; border-radius: 20px; font-size: 0.82rem; border: 1px solid rgba(255, 193, 7, 0.4);"><i class="fa-brands fa-spotify"></i> Direct Spotify Mode (OFF)</span>`;
+                }
+
+                if (data.autopilot_queue) {
+                    renderAutopilotQueueTable(data.autopilot_queue);
+                }
+            } catch (e) {
+                console.error('Autopilot toggle error:', e);
+            }
+        });
+    }
+
     // Skip Current Song Functionality
     const handleSkip = async () => {
         try {
@@ -220,36 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 5. Dynamic Continuous Autopilot Queue Table Re-render
                 if (data.autopilot_queue && data.autopilot_queue.length > 0) {
-                    const tbody = document.getElementById('autopilotTableBody');
-                    if (tbody) {
-                        tbody.innerHTML = data.autopilot_queue.map((dec, idx) => `
-                            <tr>
-                                <td>${idx + 1}</td>
-                                <td>
-                                    <div class="table-track-cell">
-                                        <img src="${dec.track.cover_url}" alt="" class="table-thumb">
-                                        <div>
-                                            <strong class="table-track-title">${dec.track.title}</strong>
-                                            <span class="table-artist">${dec.track.artist_name}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: ${Math.round(dec.factors.dna_affinity * 100)}%;"></span></span> ${Math.round(dec.factors.dna_affinity * 100)}%</td>
-                                <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: ${Math.round(dec.factors.live_context_fit * 100)}%;"></span></span> ${Math.round(dec.factors.live_context_fit * 100)}%</td>
-                                <td><span class="score-pill">+${Math.round(dec.factors.learned_preference * 100)}%</span></td>
-                                <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> ${Math.round(dec.factors.diversity_guard * 100)}%</span></td>
-                                <td>
-                                    <div style="font-size: 0.82rem; color: #d0d0d0; max-width: 280px; line-height: 1.35;">
-                                        <i class="fa-solid fa-sparkles" style="color: #1ed760; margin-right: 4px;"></i>
-                                        ${dec.why_now}
-                                    </div>
-                                </td>
-                                <td><button class="btn-play-now" data-id="${dec.decision_id}">Play now</button></td>
-                            </tr>
-                        `).join('');
-                        
-                        attachPlayNowListeners();
-                    }
+                    renderAutopilotQueueTable(data.autopilot_queue);
                 }
             }
         } catch (e) {
