@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stopProgressTimer();
         progressTimer = setInterval(() => {
             const currentTime = audio.currentTime || 0;
-            const duration = audio.duration || 8;
+            const duration = audio.duration || 240;
             const progressFill = document.querySelector('.player-progress-fill');
             if (progressFill) {
                 const percent = Math.min((currentTime / duration) * 100, 100);
@@ -125,6 +125,58 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleAudioPlayback(audio.src || null);
         });
     }
+
+    // Play Now Handler for Table Rows
+    const handlePlayNow = async (decisionId) => {
+        try {
+            const res = await fetch('/api/play', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ decision_id: decisionId })
+            });
+            const data = await res.json();
+            if (data.now_playing) {
+                const track = data.now_playing;
+                
+                // 1. Update Recommendation Card DOM
+                const cardTitle = document.querySelector('.rec-track-title');
+                const cardArtist = document.querySelector('.rec-artist-name');
+                const cardCover = document.querySelector('.rec-cover-img');
+                const cardCategory = document.querySelector('.rec-category-tag');
+                const cardReason = document.querySelector('.reason-text');
+
+                if (cardTitle) cardTitle.textContent = track.title;
+                if (cardArtist) cardArtist.innerHTML = `${track.artist_name} &bull; <em>${track.album_name}</em>`;
+                if (cardCover) cardCover.src = track.cover_url;
+                if (cardCategory) cardCategory.textContent = track.category;
+                if (cardReason) cardReason.textContent = `Selected via Play Now: ${track.title} by ${track.artist_name}`;
+
+                // 2. Update Player Bar DOM
+                const titleEl = document.getElementById('playerTitle');
+                const artistEl = document.getElementById('playerArtist');
+                const coverEl = document.getElementById('playerCover');
+                if (titleEl) titleEl.textContent = track.title;
+                if (artistEl) artistEl.textContent = track.artist_name;
+                if (coverEl) coverEl.src = track.cover_url;
+
+                // 3. Play audio
+                if (track.preview_url) {
+                    playTrackAudio(track.preview_url);
+                }
+            }
+        } catch (e) {
+            console.error('Play Now error:', e);
+        }
+    };
+
+    function attachPlayNowListeners() {
+        document.querySelectorAll('.btn-play-now').forEach(btn => {
+            btn.addEventListener('click', () => {
+                handlePlayNow(btn.dataset.id);
+            });
+        });
+    }
+    attachPlayNowListeners();
 
     // Skip Current Song Functionality
     const handleSkip = async () => {
@@ -196,20 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </tr>
                         `).join('');
                         
-                        tbody.querySelectorAll('.btn-play-now').forEach(btn => {
-                            btn.addEventListener('click', async () => {
-                                const decisionId = btn.dataset.id;
-                                const res = await fetch('/api/play', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ decision_id: decisionId })
-                                });
-                                const playData = await res.json();
-                                if (playData.now_playing && playData.now_playing.preview_url) {
-                                    playTrackAudio(playData.now_playing.preview_url);
-                                }
-                            });
-                        });
+                        attachPlayNowListeners();
                     }
                 }
             }
@@ -220,22 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (skipCurrentBtn) skipCurrentBtn.addEventListener('click', handleSkip);
     if (playerSkipBtn) playerSkipBtn.addEventListener('click', handleSkip);
-
-    // Play Now Override in Autopilot Table
-    document.querySelectorAll('.btn-play-now').forEach(btn => {
-        btn.addEventListener('click', async () => {
-            const decisionId = btn.dataset.id;
-            const res = await fetch('/api/play', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ decision_id: decisionId })
-            });
-            const data = await res.json();
-            if (data.now_playing && data.now_playing.preview_url) {
-                playTrackAudio(data.now_playing.preview_url);
-            }
-        });
-    });
 
     // Spotify OAuth Connect
     if (connectSpotifyBtn) {
