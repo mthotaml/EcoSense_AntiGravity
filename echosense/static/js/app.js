@@ -128,7 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (artistEl) artistEl.textContent = track.artist_name;
         if (coverEl) coverEl.src = track.cover_url;
 
-        // 3. Play audio preview
+        // 3. Stream official Spotify audio & local preview
+        const embedIframe = document.getElementById('spotifyEmbedIframe');
+        if (embedIframe && track.id) {
+            const spotifyTrackId = track.id.startsWith('sp_pop_') ? '0sf12qvi52faD0biXMOfrm' : track.id;
+            embedIframe.src = `https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0&autoplay=1`;
+        }
+
         if (track.preview_url) {
             playTrackAudio(track.preview_url);
         }
