@@ -165,6 +165,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (track.preview_url) {
                     playTrackAudio(track.preview_url);
                 }
+
+                // 4. Dynamic Continuous Autopilot Queue Table Re-render & Pagination Sync
+                if (data.autopilot_queue && data.autopilot_queue.length > 0) {
+                    const offset = data.page ? (data.page - 1) * 5 : 0;
+                    renderAutopilotQueueTable(data.autopilot_queue, offset);
+                    updatePaginationControls(data);
+                }
             }
         } catch (e) {
             console.error('Play Now error:', e);
@@ -334,7 +341,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (data.autopilot_queue) {
-                    renderAutopilotQueueTable(data.autopilot_queue);
+                    const offset = data.page ? (data.page - 1) * 5 : 0;
+                    renderAutopilotQueueTable(data.autopilot_queue, offset);
+                    updatePaginationControls(data);
                 }
             } catch (e) {
                 console.error('Autopilot toggle error:', e);
@@ -364,7 +373,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (data.autopilot_queue) {
-                    renderAutopilotQueueTable(data.autopilot_queue);
+                    const offset = data.page ? (data.page - 1) * 5 : 0;
+                    renderAutopilotQueueTable(data.autopilot_queue, offset);
+                    updatePaginationControls(data);
                 }
             } catch (e) {
                 console.error('Live Context toggle error:', e);
@@ -414,7 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 5. Dynamic Continuous Autopilot Queue Table Re-render
                 if (data.autopilot_queue && data.autopilot_queue.length > 0) {
-                    renderAutopilotQueueTable(data.autopilot_queue);
+                    const offset = data.page ? (data.page - 1) * 5 : 0;
+                    renderAutopilotQueueTable(data.autopilot_queue, offset);
+                    updatePaginationControls(data);
                 }
             }
         } catch (e) {
