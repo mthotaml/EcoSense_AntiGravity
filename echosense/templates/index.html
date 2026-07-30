@@ -217,6 +217,26 @@
                 </div>
             </section>
 
+            <!-- Recently Played on Spotify Section -->
+            <section class="recently-played-section card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2><i class="fa-brands fa-spotify" style="color: #1ed760;"></i> Recently Played on Spotify</h2>
+                    <span class="badge badge-success"><i class="fa-solid fa-sync"></i> Synced Live</span>
+                </div>
+                <div class="recent-tracks-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+                    {% for item in recent_tracks %}
+                    <div class="recent-track-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px; display: flex; gap: 12px; align-items: center;">
+                        <img src="{{ item.cover_url }}" alt="" style="width: 54px; height: 54px; border-radius: 8px; object-fit: cover;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">{{ item.title }}</div>
+                            <div style="font-size: 0.82rem; color: #a0a0a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.artist_name }}</div>
+                            <div style="font-size: 0.75rem; color: #1ed760; margin-top: 2px;">{{ item.category }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
             <!-- 9. Music DNA Summary -->
             <section class="dna-summary-section card">
                 <h2><i class="fa-solid fa-dna"></i> Music DNA Summary</h2>

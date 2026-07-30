@@ -107,12 +107,24 @@ def read_root(request: Request, db: Session = Depends(get_db)):
     is_connected = bool(user and user.connection_status == "connected")
     user_name = user.spotify_display_name if (user and user.spotify_display_name) else "EchoSense Listener"
 
+    recent_tracks = demo_recent_tracks
+    if user and user.encrypted_access_token:
+        try:
+            token = decrypt_token(user.encrypted_access_token)
+            if token:
+                live_recent = spotify_adapter.get_recent_tracks(token)
+                if live_recent:
+                    recent_tracks = live_recent
+        except Exception as e:
+            print("Error reading user token:", e)
+
     template = templates.get_template("index.html")
     html_content = template.render({
         "request": request,
         "current_pick": current_pick,
         "next_pick": next_pick,
         "autopilot_queue": autopilot_queue,
+        "recent_tracks": recent_tracks,
         "context": context,
         "pattern": pattern,
         "profile": demo_profile,
