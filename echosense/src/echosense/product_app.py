@@ -199,7 +199,7 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         "settings": settings,
         "int": int
     })
-    return HTMLResponse(content=html_content)
+    return html_content
 
 
 @app.post("/api/autopilot/toggle")
