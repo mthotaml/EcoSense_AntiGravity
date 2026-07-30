@@ -26,25 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaying = false;
     let progressTimer = null;
 
-    function playTrackAudio(previewUrl) {
-        if (!previewUrl) return;
-
-        const absoluteUrl = new URL(previewUrl, window.location.origin).href;
-        if (audio.src !== absoluteUrl) {
-            audio.src = absoluteUrl;
-        }
-
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                isPlaying = true;
-                updatePlayIcons(true);
-                startProgressTimer();
-            }).catch(err => {
-                console.log("Audio play notice:", err);
-                isPlaying = false;
-                updatePlayIcons(false);
-            });
+    function playTrackAudio(trackOrUrl) {
+        const embedIframe = document.getElementById('spotifyEmbedIframe');
+        if (embedIframe) {
+            let trackId = typeof trackOrUrl === 'string' ? trackOrUrl : (trackOrUrl && trackOrUrl.id ? trackOrUrl.id : '');
+            if (trackId && !trackId.startsWith('http') && !trackId.startsWith('/')) {
+                embedIframe.src = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&theme=0&autoplay=1`;
+            }
         }
     }
 
