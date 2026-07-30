@@ -180,7 +180,102 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     attachPlayNowListeners();
 
-    function renderAutopilotQueueTable(queue) {
+    let currentAutopilotPage = 1;
+    let autopilotTotalPages = 1;
+    let autopilotTotalItems = 0;
+
+    const btnPrevPage = document.getElementById('btnPrevPage');
+    const btnNextPage = document.getElementById('btnNextPage');
+    const btnLoadMoreTracks = document.getElementById('btnLoadMoreTracks');
+    const currentPageNumEl = document.getElementById('currentPageNum');
+    const totalPagesNumEl = document.getElementById('totalPagesNum');
+    const totalQueueItemsEl = document.getElementById('totalQueueItems');
+    const pageQuickJumpContainer = document.getElementById('pageQuickJumpContainer');
+
+    function updatePaginationControls(data) {
+        if (!data) return;
+        currentAutopilotPage = data.page || 1;
+        autopilotTotalPages = data.total_pages || 1;
+        autopilotTotalItems = data.total_items || 0;
+
+        if (currentPageNumEl) currentPageNumEl.textContent = currentAutopilotPage;
+        if (totalPagesNumEl) totalPagesNumEl.textContent = autopilotTotalPages;
+        if (totalQueueItemsEl) totalQueueItemsEl.textContent = autopilotTotalItems;
+
+        if (btnPrevPage) btnPrevPage.disabled = (currentAutopilotPage <= 1);
+        if (btnNextPage) btnNextPage.disabled = (currentAutopilotPage >= autopilotTotalPages);
+
+        if (pageQuickJumpContainer) {
+            let btnsHtml = '';
+            for (let p = 1; p <= autopilotTotalPages; p++) {
+                const isActive = (p === currentAutopilotPage);
+                btnsHtml += `
+                    <button class="btn-page-num ${isActive ? 'active' : ''}" data-page="${p}" style="padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; background: ${isActive ? '#1ed760' : 'rgba(255,255,255,0.08)'}; color: ${isActive ? '#000' : '#fff'}; border: none; cursor: pointer; font-weight: 600;">
+                        ${p}
+                    </button>
+                `;
+            }
+            pageQuickJumpContainer.innerHTML = btnsHtml;
+            attachQuickJumpListeners();
+        }
+    }
+
+    async function fetchAutopilotPage(page) {
+        try {
+            const res = await fetch(`/api/autopilot?page=${page}&page_size=5`);
+            const data = await res.json();
+            if (data.autopilot_queue) {
+                renderAutopilotQueueTable(data.autopilot_queue, (page - 1) * 5);
+                updatePaginationControls(data);
+            }
+        } catch (e) {
+            console.error('Fetch page error:', e);
+        }
+    }
+
+    function attachQuickJumpListeners() {
+        document.querySelectorAll('.btn-page-num').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const p = parseInt(btn.dataset.page, 10);
+                if (p && p !== currentAutopilotPage) {
+                    fetchAutopilotPage(p);
+                }
+            });
+        });
+    }
+    attachQuickJumpListeners();
+
+    if (btnPrevPage) {
+        btnPrevPage.addEventListener('click', () => {
+            if (currentAutopilotPage > 1) {
+                fetchAutopilotPage(currentAutopilotPage - 1);
+            }
+        });
+    }
+
+    if (btnNextPage) {
+        btnNextPage.addEventListener('click', () => {
+            if (currentAutopilotPage < autopilotTotalPages) {
+                fetchAutopilotPage(currentAutopilotPage + 1);
+            }
+        });
+    }
+
+    if (btnLoadMoreTracks) {
+        btnLoadMoreTracks.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/autopilot/load_more', { method: 'POST' });
+                const data = await res.json();
+                if (data.autopilot_queue) {
+                    fetchAutopilotPage(data.total_pages);
+                }
+            } catch (e) {
+                console.error('Load more error:', e);
+            }
+        });
+    }
+
+    function renderAutopilotQueueTable(queue, indexOffset = 0) {
         const tbody = document.getElementById('autopilotTableBody');
         if (!tbody) return;
 
@@ -192,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return `
                 <tr>
-                    <td>${idx + 1}</td>
+                    <td>${indexOffset + idx + 1}</td>
                     <td>
                         <div class="table-track-cell">
                             <img src="${dec.track.cover_url}" alt="" class="table-thumb">

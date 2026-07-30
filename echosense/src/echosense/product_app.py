@@ -82,18 +82,53 @@ def healthz():
     }
 
 
+def serialize_queue_page(page: int = 1, page_size: int = 5):
+    """Helper to maintain continuous queue and return paginated decisions."""
+    all_candidates = demo_top_tracks + demo_recent_tracks
+    context = context_resolver.get_live_context()
+    demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
+    
+    items, current_page, size, total_pages, total_items = demo_autopilot.get_paginated_queue(page, page_size)
+    
+    serialized_items = [
+        {
+            "decision_id": d.decision_id,
+            "track": d.track,
+            "confidence": d.confidence,
+            "why_now": d.why_now,
+            "factors": {
+                "dna_affinity": d.factors.dna_affinity if d.factors else 1.0,
+                "live_context_fit": d.factors.live_context_fit if d.factors else 1.0,
+                "learned_preference": d.factors.learned_preference if d.factors else 0.0,
+                "diversity_guard": d.factors.diversity_guard if d.factors else 1.0
+            } if d.factors else None
+        }
+        for d in items
+    ]
+    
+    return {
+        "status": "success",
+        "page": current_page,
+        "page_size": size,
+        "total_pages": total_pages,
+        "total_items": total_items,
+        "autopilot_queue": serialized_items
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request, db: Session = Depends(get_db)):
     """Render Primary EchoSense Listener Interface."""
     context = context_resolver.get_live_context()
     all_candidates = demo_top_tracks + demo_recent_tracks
     
-    # Generate recommendations & Autopilot queue
+    # Generate recommendations & Autopilot continuous queue
     decisions = demo_ranker.rank_candidates(all_candidates, context)
-    autopilot_queue = demo_autopilot.maintain_queue(all_candidates, context)
+    demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
+    page_items, current_page, page_size, total_pages, total_items = demo_autopilot.get_paginated_queue(page=1, page_size=5)
     
     current_pick = decisions[0] if decisions else None
-    next_pick = autopilot_queue[0] if autopilot_queue else None
+    next_pick = page_items[0] if page_items else None
     
     # Record decision provenance
     governance = GovernanceEngine(db)
@@ -123,7 +158,11 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         "request": request,
         "current_pick": current_pick,
         "next_pick": next_pick,
-        "autopilot_queue": autopilot_queue,
+        "autopilot_queue": page_items,
+        "autopilot_page": current_page,
+        "autopilot_page_size": page_size,
+        "autopilot_total_pages": total_pages,
+        "autopilot_total_items": total_items,
         "recent_tracks": recent_tracks,
         "context": context,
         "pattern": pattern,
@@ -141,28 +180,7 @@ def read_root(request: Request, db: Session = Depends(get_db)):
 def toggle_autopilot_mode(enabled: bool = Body(..., embed=True)):
     """Toggle between Music DNA Autopilot Queue and Direct Spotify Streaming Mode."""
     demo_autopilot.is_enabled = enabled
-    all_candidates = demo_top_tracks + demo_recent_tracks
-    context = context_resolver.get_live_context()
-    updated_queue = demo_autopilot.maintain_queue(all_candidates, context)
-    return {
-        "status": "success",
-        "enabled": demo_autopilot.is_enabled,
-        "autopilot_queue": [
-            {
-                "decision_id": d.decision_id,
-                "track": d.track,
-                "confidence": d.confidence,
-                "why_now": d.why_now,
-                "factors": {
-                    "dna_affinity": d.factors.dna_affinity if d.factors else 1.0,
-                    "live_context_fit": d.factors.live_context_fit if d.factors else 1.0,
-                    "learned_preference": d.factors.learned_preference if d.factors else 0.0,
-                    "diversity_guard": d.factors.diversity_guard if d.factors else 1.0
-                } if d.factors else None
-            }
-            for d in updated_queue
-        ]
-    }
+    return serialize_queue_page(page=1, page_size=5)
 
 
 @app.post("/api/context/toggle")
@@ -170,28 +188,23 @@ def toggle_live_context_mode(enabled: bool = Body(..., embed=True)):
     """Toggle whether live context resolution is factored into DNA queue ranking."""
     demo_ranker.use_live_context = enabled
     demo_autopilot.upcoming_queue = []  # Force fresh queue recalculation
+    return serialize_queue_page(page=1, page_size=5)
+
+
+@app.get("/api/autopilot")
+def get_autopilot_queue(page: int = Query(1, ge=1), page_size: int = Query(5, ge=1, le=20)):
+    """API endpoint to fetch paginated Autopilot queue."""
+    return serialize_queue_page(page, page_size)
+
+
+@app.post("/api/autopilot/load_more")
+def load_more_autopilot_tracks(db: Session = Depends(get_db)):
+    """Dynamically rank and append 5 fresh relevant DNA tracks to the continuous queue."""
     all_candidates = demo_top_tracks + demo_recent_tracks
     context = context_resolver.get_live_context()
-    updated_queue = demo_autopilot.maintain_queue(all_candidates, context)
-    return {
-        "status": "success",
-        "use_live_context": demo_ranker.use_live_context,
-        "autopilot_queue": [
-            {
-                "decision_id": d.decision_id,
-                "track": d.track,
-                "confidence": d.confidence,
-                "why_now": d.why_now,
-                "factors": {
-                    "dna_affinity": d.factors.dna_affinity if d.factors else 1.0,
-                    "live_context_fit": d.factors.live_context_fit if d.factors else 1.0,
-                    "learned_preference": d.factors.learned_preference if d.factors else 0.0,
-                    "diversity_guard": d.factors.diversity_guard if d.factors else 1.0
-                } if d.factors else None
-            }
-            for d in updated_queue
-        ]
-    }
+    current_size = len(demo_autopilot.upcoming_queue)
+    demo_autopilot.maintain_queue(all_candidates, context, target_size=current_size + 5)
+    return serialize_queue_page(page=1, page_size=5)
 
 
 @app.post("/api/settings/spotify")
@@ -366,7 +379,8 @@ def skip_current_track(db: Session = Depends(get_db)):
         next_decision = new_queue[0] if new_queue else demo_ranker.rank_candidates(all_candidates, context)[0]
 
     # Replenish queue for continuous autopilot stream
-    updated_queue = demo_autopilot.maintain_queue(all_candidates, context)
+    demo_autopilot.maintain_queue(all_candidates, context, target_size=20)
+    page_data = serialize_queue_page(page=1, page_size=5)
 
     # Record skipped outcome against decision
     governance = GovernanceEngine(db)
@@ -384,21 +398,11 @@ def skip_current_track(db: Session = Depends(get_db)):
         "now_playing": next_decision.track,
         "decision_id": next_decision.decision_id,
         "why_now": next_decision.why_now,
-        "autopilot_queue": [
-            {
-                "decision_id": d.decision_id,
-                "track": d.track,
-                "confidence": d.confidence,
-                "why_now": d.why_now,
-                "factors": {
-                    "dna_affinity": d.factors.dna_affinity,
-                    "live_context_fit": d.factors.live_context_fit,
-                    "learned_preference": d.factors.learned_preference,
-                    "diversity_guard": d.factors.diversity_guard
-                }
-            }
-            for d in updated_queue
-        ]
+        "page": page_data["page"],
+        "page_size": page_data["page_size"],
+        "total_pages": page_data["total_pages"],
+        "total_items": page_data["total_items"],
+        "autopilot_queue": page_data["autopilot_queue"]
     }
 
 

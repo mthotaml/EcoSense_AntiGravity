@@ -199,6 +199,35 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Continuous Queue Pagination Bar -->
+                <div class="autopilot-pagination-bar" style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn btn-secondary-save" id="btnPrevPage" style="padding: 6px 14px; font-size: 0.85rem;" disabled>
+                            <i class="fa-solid fa-chevron-left"></i> Previous Page
+                        </button>
+                        <span style="font-size: 0.88rem; color: #b3b3b3;">
+                            Page <strong id="currentPageNum" style="color: #fff;">{{ autopilot_page }}</strong> of <strong id="totalPagesNum" style="color: #fff;">{{ autopilot_total_pages }}</strong> 
+                            (<span id="totalQueueItems">{{ autopilot_total_items }}</span> tracks in dynamic queue)
+                        </span>
+                        <button class="btn btn-secondary-save" id="btnNextPage" style="padding: 6px 14px; font-size: 0.85rem;">
+                            Next Page <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div id="pageQuickJumpContainer" style="display: flex; gap: 6px;">
+                            {% for p in range(1, autopilot_total_pages + 1) %}
+                            <button class="btn-page-num {% if p == autopilot_page %}active{% endif %}" data-page="{{ p }}" style="padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; background: {% if p == autopilot_page %}#1ed760{% else %}rgba(255,255,255,0.08){% endif %}; color: {% if p == autopilot_page %}#000{% else %}#fff{% endif %}; border: none; cursor: pointer; font-weight: 600;">
+                                {{ p }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-secondary-save" id="btnLoadMoreTracks" style="background: rgba(30, 215, 96, 0.15); color: #1ed760; border: 1px solid rgba(30, 215, 96, 0.4); padding: 6px 14px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-plus"></i> Load More DNA Tracks
+                        </button>
+                    </div>
+                </div>
             </section>
 
             <!-- 7. Context Summary Chips -->
