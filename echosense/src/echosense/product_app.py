@@ -169,9 +169,15 @@ def auth_spotify_callback(request: Request, code: str = Query(...), state: str =
     access_token = tokens.get("access_token", "")
     refresh_token = tokens.get("refresh_token", "")
 
-    # Ingest user tracks from Spotify API using new access token
+    # Ingest user profile & tracks from Spotify API using new access token
+    display_name = "EchoSense Listener"
+    email = "listener@echosense.ai"
     if access_token:
         try:
+            sp_profile = spotify_adapter.get_user_profile(access_token)
+            display_name = sp_profile.get("display_name") or display_name
+            email = sp_profile.get("email") or email
+            
             user_top = spotify_adapter.get_top_tracks(access_token)
             user_recent = spotify_adapter.get_recent_tracks(access_token)
             demo_profile.ingest_signals(user_top, user_recent)
@@ -181,9 +187,11 @@ def auth_spotify_callback(request: Request, code: str = Query(...), state: str =
     # Store user with encrypted tokens
     user = db.query(UserRecord).filter(UserRecord.id == "listener_01").first()
     if not user:
-        user = UserRecord(id="listener_01", spotify_display_name="EchoSense Listener", spotify_email="listener@echosense.ai")
+        user = UserRecord(id="listener_01", spotify_display_name=display_name, spotify_email=email)
         db.add(user)
 
+    user.spotify_display_name = display_name
+    user.spotify_email = email
     user.encrypted_access_token = encrypt_token(access_token)
     user.encrypted_refresh_token = encrypt_token(refresh_token)
     user.scopes = settings.SPOTIFY_SCOPES

@@ -88,14 +88,32 @@ class SpotifyAdapter:
 
         return f"refreshed_access_token_{int(time.time())}"
 
-    # Ingestion API calls
     def get_user_profile(self, access_token: str) -> dict:
-        """Fetch Spotify user profile."""
+        """Fetch Spotify user profile via Spotify API."""
+        if access_token and not access_token.startswith("mock_"):
+            try:
+                headers = {"Authorization": f"Bearer {access_token}"}
+                res = requests.get("https://api.spotify.com/v1/me", headers=headers, timeout=10)
+                if res.status_code == 200:
+                    data = res.json()
+                    images = data.get("images", [])
+                    avatar_url = images[0]["url"] if images else None
+                    return {
+                        "id": data.get("id"),
+                        "display_name": data.get("display_name") or data.get("id"),
+                        "email": data.get("email"),
+                        "product": data.get("product"),
+                        "avatar_url": avatar_url
+                    }
+            except Exception as e:
+                print("Error fetching Spotify user profile:", e)
+
         return {
             "id": "listener_01",
             "display_name": "EchoSense Listener",
             "email": "listener@echosense.ai",
-            "product": "premium"
+            "product": "premium",
+            "avatar_url": None
         }
 
     def get_top_tracks(self, access_token: str) -> List[Track]:
