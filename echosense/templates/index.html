@@ -203,7 +203,22 @@
 
             <!-- 7. Context Summary Chips -->
             <section class="context-summary-section card">
-                <h2><i class="fa-solid fa-cloud-sun"></i> Live Context Resolution</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h2 style="margin: 0;"><i class="fa-solid fa-cloud-sun"></i> Live Context Resolution</h2>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                            <input type="checkbox" id="liveContextToggle" {% if use_live_context %}checked{% endif %} style="width: 18px; height: 18px; accent-color: #1ed760;">
+                            <strong>Factor Live Context in DNA Queue</strong>
+                        </label>
+                        <span id="liveContextStatusBadge">
+                            {% if use_live_context %}
+                                <span class="pulse-dot"></span> <span style="color: #1ed760; font-weight: 600; font-size: 0.85rem;">Live Context ON</span>
+                            {% else %}
+                                <span style="background: rgba(220, 53, 69, 0.2); color: #ff6b6b; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; border: 1px solid rgba(220, 53, 69, 0.4);"><i class="fa-solid fa-ban"></i> Live Context OFF</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
                 <div class="chips-container">
                     <div class="context-chip"><i class="fa-regular fa-clock"></i> Daypart: {{ context.daypart | capitalize }}</div>
                     <div class="context-chip"><i class="fa-solid fa-cloud-sun"></i> Weather: {{ context.weather }}</div>

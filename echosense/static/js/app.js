@@ -247,6 +247,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Live Context Resolution ON / OFF Toggle
+    const liveContextToggle = document.getElementById('liveContextToggle');
+    const liveContextStatusBadge = document.getElementById('liveContextStatusBadge');
+
+    if (liveContextToggle) {
+        liveContextToggle.addEventListener('change', async () => {
+            const enabled = liveContextToggle.checked;
+            try {
+                const res = await fetch('/api/context/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: enabled })
+                });
+                const data = await res.json();
+
+                if (liveContextStatusBadge) {
+                    liveContextStatusBadge.innerHTML = enabled
+                        ? `<span class="pulse-dot"></span> <span style="color: #1ed760; font-weight: 600; font-size: 0.85rem;">Live Context ON</span>`
+                        : `<span style="background: rgba(220, 53, 69, 0.2); color: #ff6b6b; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; border: 1px solid rgba(220, 53, 69, 0.4);"><i class="fa-solid fa-ban"></i> Live Context OFF</span>`;
+                }
+
+                if (data.autopilot_queue) {
+                    renderAutopilotQueueTable(data.autopilot_queue);
+                }
+            } catch (e) {
+                console.error('Live Context toggle error:', e);
+            }
+        });
+    }
+
     // Skip Current Song Functionality
     const handleSkip = async () => {
         try {

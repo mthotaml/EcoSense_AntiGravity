@@ -13,6 +13,7 @@ class ContextualRanker:
     def __init__(self, dna_profile: MusicDNAProfile):
         self.profile = dna_profile
         self.disliked_track_ids: Set[str] = set()
+        self.use_live_context: bool = True
 
     def add_disliked_track(self, track_id: str):
         """Record explicit negative feedback to block candidate."""
@@ -62,10 +63,13 @@ class ContextualRanker:
             if dna_affinity < settings.DNA_FLOOR_THRESHOLD:
                 continue
 
-            # Calculate Live Context Fit
-            raw_context_fit = self._compute_context_fit(track, context_data)
-            # Enforce 35% cap on contextual influence
-            capped_context_fit = min(raw_context_fit, settings.MAX_CONTEXT_INFLUENCE_PCT)
+            # Calculate Live Context Fit (if enabled by user)
+            if self.use_live_context:
+                raw_context_fit = self._compute_context_fit(track, context_data)
+                capped_context_fit = min(raw_context_fit, settings.MAX_CONTEXT_INFLUENCE_PCT)
+            else:
+                raw_context_fit = 0.0
+                capped_context_fit = 0.0
 
             # Rule 5: Diversity & Artist Fatigue Guard
             artist_name_clean = track.artist_name.lower()
@@ -96,7 +100,7 @@ class ContextualRanker:
                 confidence=round(factors.composite_score, 2),
                 why_now=why_now,
                 factors=factors,
-                context_summary=self._format_context_summary(context_data)
+                context_summary=self._format_context_summary(context_data) if self.use_live_context else "Live Context OFF"
             )
 
             decisions.append(decision)
@@ -132,7 +136,10 @@ class ContextualRanker:
         
         parts = []
         parts.append(f"{dna_pct}% DNA match")
-        parts.append(f"matches your {daypart} {activity}")
+        if self.use_live_context:
+            parts.append(f"matches your {daypart} {activity}")
+        else:
+            parts.append("live context OFF")
         parts.append("guarded against artist fatigue")
 
         return " • ".join(parts)
