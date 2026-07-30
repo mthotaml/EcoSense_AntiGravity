@@ -55,18 +55,12 @@ context_resolver = ContextResolver()
 
 # Setup default user profile & ranker
 demo_profile = MusicDNAProfile("listener_01")
-demo_top_tracks = spotify_adapter.get_top_tracks("mock_access_token")
-demo_recent_tracks = spotify_adapter.get_recent_tracks("mock_access_token")
-demo_profile.ingest_signals(demo_top_tracks, demo_recent_tracks)
+demo_top_tracks = []
+demo_recent_tracks = []
 
 demo_ranker = ContextualRanker(demo_profile)
 demo_autopilot = MusicDNAAutopilot(demo_ranker)
 demo_temporal = TemporalPatternLearner("listener_01")
-
-# Pre-populate sample listening events for temporal pattern learner
-demo_temporal.record_listening_event("morning", "sp_track_101", 0.95, datetime.utcnow())
-demo_temporal.record_listening_event("morning", "sp_track_102", 0.90, datetime.utcnow())
-demo_temporal.record_listening_event("morning", "sp_track_103", 0.85, datetime.utcnow() - timedelta(days=1))
 
 
 @app.get("/healthz")

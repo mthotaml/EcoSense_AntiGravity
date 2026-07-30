@@ -361,10 +361,10 @@
         <footer class="persistent-player">
             <div class="container player-container">
                 <div class="player-left">
-                    <img src="{{ current_pick.track.cover_url }}" alt="" class="player-cover-art" id="playerCover">
+                    <img src="{% if current_pick and current_pick.track %}{{ current_pick.track.cover_url }}{% else %}https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80{% endif %}" alt="" class="player-cover-art" id="playerCover">
                     <div class="player-track-meta">
-                        <span class="player-title" id="playerTitle">{{ current_pick.track.title }}</span>
-                        <span class="player-artist" id="playerArtist">{{ current_pick.track.artist_name }}</span>
+                        <span class="player-title" id="playerTitle">{% if current_pick and current_pick.track %}{{ current_pick.track.title }}{% else %}No Active Track{% endif %}</span>
+                        <span class="player-artist" id="playerArtist">{% if current_pick and current_pick.track %}{{ current_pick.track.artist_name }}{% else %}Connect Spotify to stream{% endif %}</span>
                     </div>
                 </div>
 

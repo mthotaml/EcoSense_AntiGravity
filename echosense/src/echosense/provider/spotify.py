@@ -155,71 +155,10 @@ class SpotifyAdapter:
             except Exception as e:
                 print("Spotify API fetch top tracks error:", e)
 
-        return [
-            Track(
-                id="sp_track_101",
-                title="Midnight City Wave",
-                artist_name="M83 & Echo",
-                artist_id="sp_art_01",
-                album_name="Hurry Up, We're Dreaming",
-                duration_ms=243000,
-                isrc="USM831100001",
-                preview_url="/static/audio/track101.mp3",
-                cover_url="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80",
-                category="Deep Focus"
-            ),
-            Track(
-                id="sp_track_102",
-                title="Starlight Reverie",
-                artist_name="Solaris Ambient",
-                artist_id="sp_art_02",
-                album_name="Cosmic Echoes",
-                duration_ms=210000,
-                isrc="USSOL2200002",
-                preview_url="/static/audio/track102.mp3",
-                cover_url="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80",
-                category="Nature Soundscapes"
-            ),
-            Track(
-                id="sp_track_103",
-                title="Pacific Breeze Lo-Fi",
-                artist_name="Botanical Beats",
-                artist_id="sp_art_03",
-                album_name="Organic Chill",
-                duration_ms=185000,
-                isrc="USBOT2200003",
-                preview_url="/static/audio/track103.mp3",
-                cover_url="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80",
-                category="Eco Lo-Fi Beats"
-            ),
-            Track(
-                id="sp_track_105",
-                title="Solar Drift 432Hz",
-                artist_name="Solaris Ambient",
-                artist_id="sp_art_02",
-                album_name="Cosmic Equilibrium",
-                duration_ms=252000,
-                isrc="USSOL2200005",
-                preview_url="/static/audio/track105.mp3",
-                cover_url="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80",
-                category="Deep Focus"
-            ),
-            Track(
-                id="sp_track_106",
-                title="Amazonian Rainforest Symphony",
-                artist_name="EcoSense Ensemble",
-                artist_id="sp_art_05",
-                album_name="Earth Harmonies",
-                duration_ms=225000,
-                isrc="USECO2200006",
-                preview_url="/static/audio/track106.mp3",
-                cover_url="https://images.unsplash.com/photo-1511497584788-876761c1298b?w=400&auto=format&fit=crop&q=80",
-                category="Nature Soundscapes"
-            )
-        ]
+        return []
 
     def get_recent_tracks(self, access_token: str) -> List[Track]:
-        """Fetch Recently Played Tracks (Expanded Demo Catalog)."""
+        """Fetch Recently Played Tracks from Spotify API."""
         if access_token and not access_token.startswith("mock_"):
             try:
                 headers = {"Authorization": f"Bearer {access_token}"}
@@ -258,44 +197,7 @@ class SpotifyAdapter:
             except Exception as e:
                 print("Spotify API fetch recent tracks error:", e)
 
-        return [
-            Track(
-                id="sp_track_104",
-                title="Emerald Rain Meditation",
-                artist_name="Kyoto Zen Project",
-                artist_id="sp_art_04",
-                album_name="Sanctuary",
-                duration_ms=310000,
-                isrc="USKYO2200004",
-                preview_url="/static/audio/track104.mp3",
-                cover_url="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?w=400&auto=format&fit=crop&q=80",
-                category="Meditation & Calm"
-            ),
-            Track(
-                id="sp_track_107",
-                title="Green Leaf Coffee Chill",
-                artist_name="Botanical Beats",
-                artist_id="sp_art_03",
-                album_name="Organic Chill",
-                duration_ms=150000,
-                isrc="USBOT2200007",
-                preview_url="/static/audio/track107.mp3",
-                cover_url="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=400&auto=format&fit=crop&q=80",
-                category="Eco Lo-Fi Beats"
-            ),
-            Track(
-                id="sp_track_108",
-                title="Tibetan Bowl & Mountain Reverie",
-                artist_name="Kyoto Zen Project",
-                artist_id="sp_art_04",
-                album_name="Sanctuary",
-                duration_ms=360000,
-                isrc="USKYO2200008",
-                preview_url="/static/audio/track108.wav",
-                cover_url="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&auto=format&fit=crop&q=80",
-                category="Meditation & Calm"
-            )
-        ]
+        return []
 
     # Playback Controls
     def get_active_devices(self, access_token: str) -> List[dict]:
