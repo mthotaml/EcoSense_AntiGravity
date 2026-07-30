@@ -445,6 +445,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Spotify Credentials Form Handler
+    const spotifyCredsForm = document.getElementById('spotifyCredsForm');
+    const spotifyClientIdInput = document.getElementById('spotifyClientIdInput');
+    const spotifyClientSecretInput = document.getElementById('spotifyClientSecretInput');
+
+    if (spotifyCredsForm) {
+        spotifyCredsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const clientId = spotifyClientIdInput.value.trim();
+            const clientSecret = spotifyClientSecretInput.value.trim();
+
+            if (!clientId || !clientSecret) {
+                alert('Please enter both Spotify Client ID and Client Secret.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/settings/spotify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    window.location.href = '/auth/spotify';
+                }
+            } catch (err) {
+                console.error('Error updating Spotify credentials:', err);
+            }
+        });
+    }
+
     // Correction Form
     if (correctionForm) {
         correctionForm.addEventListener('submit', async (e) => {

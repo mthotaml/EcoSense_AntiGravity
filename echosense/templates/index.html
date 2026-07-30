@@ -72,6 +72,27 @@
                 </div>
             </div>
 
+            <!-- Spotify Developer Credentials Config Card -->
+            <div class="credentials-card card" style="margin-bottom: 24px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 14px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;"><i class="fa-brands fa-spotify" style="color: #1ed760;"></i> Spotify API Developer Credentials</h3>
+                        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #a0a0a0;">Enter your Spotify Developer App <strong>Client ID</strong> &amp; <strong>Client Secret</strong> to fetch real tracks directly from your Spotify library.</p>
+                    </div>
+                    <span class="badge" style="background: rgba(30, 215, 96, 0.15); color: #1ed760; border: 1px solid rgba(30, 215, 96, 0.4); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem;">
+                        Client ID: {{ settings.SPOTIFY_CLIENT_ID[:8] }}... &bull; Secret: {% if settings.SPOTIFY_CLIENT_SECRET %}Configured ✓{% else %}Missing ⚠️{% endif %}
+                    </span>
+                </div>
+
+                <form id="spotifyCredsForm" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: center;">
+                    <input type="text" id="spotifyClientIdInput" placeholder="Spotify Client ID" value="{{ settings.SPOTIFY_CLIENT_ID }}" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+                    <input type="password" id="spotifyClientSecretInput" placeholder="Spotify Client Secret (32-char hex)" value="{{ settings.SPOTIFY_CLIENT_SECRET }}" required style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 0.88rem;">
+                    <button type="submit" class="btn btn-primary-play" style="padding: 10px 20px; font-size: 0.88rem; white-space: nowrap;">
+                        <i class="fa-solid fa-key"></i> Save &amp; Connect Real Spotify
+                    </button>
+                </form>
+            </div>
+
             <!-- 4. Current Recommendation -->
             {% if current_pick %}
             <section class="current-rec-section card">

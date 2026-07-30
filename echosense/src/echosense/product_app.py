@@ -171,6 +171,7 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         "is_connected": is_connected,
         "autopilot_enabled": demo_autopilot.is_enabled,
         "use_live_context": demo_ranker.use_live_context,
+        "settings": settings,
         "int": int
     })
     return HTMLResponse(content=html_content)
@@ -209,7 +210,7 @@ def load_more_autopilot_tracks(db: Session = Depends(get_db)):
 
 @app.post("/api/settings/spotify")
 def update_spotify_credentials(payload: dict = Body(...)):
-    """Update Spotify Client ID and Client Secret dynamically."""
+    """Update Spotify Client ID and Client Secret dynamically and persist to .env."""
     client_id = payload.get("client_id")
     client_secret = payload.get("client_secret")
     
@@ -220,7 +221,39 @@ def update_spotify_credentials(payload: dict = Body(...)):
         settings.SPOTIFY_CLIENT_SECRET = client_secret.strip()
         spotify_adapter.client_secret = client_secret.strip()
         
-    return {"status": "success", "client_id": settings.SPOTIFY_CLIENT_ID, "has_secret": bool(settings.SPOTIFY_CLIENT_SECRET)}
+    # Write to .env on disk for persistence
+    env_path = os.path.join(base_dir, ".env")
+    env_lines = []
+    if os.path.exists(env_path):
+        with open(env_path, "r") as f:
+            env_lines = f.readlines()
+
+    new_lines = []
+    has_id = False
+    has_secret = False
+    for line in env_lines:
+        if line.startswith("SPOTIFY_CLIENT_ID="):
+            new_lines.append(f"SPOTIFY_CLIENT_ID={settings.SPOTIFY_CLIENT_ID}\n")
+            has_id = True
+        elif line.startswith("SPOTIFY_CLIENT_SECRET="):
+            new_lines.append(f"SPOTIFY_CLIENT_SECRET={settings.SPOTIFY_CLIENT_SECRET}\n")
+            has_secret = True
+        else:
+            new_lines.append(line)
+
+    if not has_id:
+        new_lines.append(f"SPOTIFY_CLIENT_ID={settings.SPOTIFY_CLIENT_ID}\n")
+    if not has_secret and settings.SPOTIFY_CLIENT_SECRET:
+        new_lines.append(f"SPOTIFY_CLIENT_SECRET={settings.SPOTIFY_CLIENT_SECRET}\n")
+
+    with open(env_path, "w") as f:
+        f.writelines(new_lines)
+
+    return {
+        "status": "success",
+        "client_id": settings.SPOTIFY_CLIENT_ID,
+        "has_secret": bool(settings.SPOTIFY_CLIENT_SECRET)
+    }
 
 
 pkce_verifiers = {}
