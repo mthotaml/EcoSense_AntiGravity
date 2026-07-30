@@ -98,7 +98,7 @@ def get_user_candidates(db: Session = None) -> List[any]:
                         return real_top + real_recent
             except Exception as e:
                 print("Error retrieving real user candidates:", e)
-    return demo_top_tracks + demo_recent_tracks
+    return spotify_adapter.get_popular_spotify_catalog()
 
 
 def serialize_queue_page(page: int = 1, page_size: int = 5, db: Session = None):

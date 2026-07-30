@@ -155,7 +155,7 @@ class SpotifyAdapter:
             except Exception as e:
                 print("Spotify API fetch top tracks error:", e)
 
-        return []
+        return self.get_popular_spotify_catalog()[:3]
 
     def get_recent_tracks(self, access_token: str) -> List[Track]:
         """Fetch Recently Played Tracks from Spotify API."""
@@ -197,7 +197,72 @@ class SpotifyAdapter:
             except Exception as e:
                 print("Spotify API fetch recent tracks error:", e)
 
-        return []
+        return self.get_popular_spotify_catalog()[2:]
+
+    def get_popular_spotify_catalog(self) -> List[Track]:
+        """Popular Spotify Tracks catalog to ensure rich candidates when offline/unauthenticated."""
+        return [
+            Track(
+                id="sp_pop_101",
+                title="hiwang hiwang do hiwang - Slowed",
+                artist_name="AntonioVivald",
+                artist_id="sp_art_vivald",
+                album_name="hiwang hiwang do hiwang",
+                duration_ms=210000,
+                isrc="USVIV2200101",
+                preview_url="/static/audio/track101.mp3",
+                cover_url="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80",
+                category="Spotify Top"
+            ),
+            Track(
+                id="sp_pop_102",
+                title="Blinding Lights",
+                artist_name="The Weeknd",
+                artist_id="sp_art_weeknd",
+                album_name="After Hours",
+                duration_ms=200000,
+                isrc="USUG11904206",
+                preview_url="/static/audio/track102.mp3",
+                cover_url="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&auto=format&fit=crop&q=80",
+                category="Deep Focus"
+            ),
+            Track(
+                id="sp_pop_103",
+                title="As It Was",
+                artist_name="Harry Styles",
+                artist_id="sp_art_styles",
+                album_name="Harry's House",
+                duration_ms=167000,
+                isrc="USSM12200612",
+                preview_url="/static/audio/track103.mp3",
+                cover_url="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&auto=format&fit=crop&q=80",
+                category="Eco Lo-Fi Beats"
+            ),
+            Track(
+                id="sp_pop_104",
+                title="Cruel Summer",
+                artist_name="Taylor Swift",
+                artist_id="sp_art_swift",
+                album_name="Lover",
+                duration_ms=178000,
+                isrc="USUG11901472",
+                preview_url="/static/audio/track105.mp3",
+                cover_url="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80",
+                category="Nature Soundscapes"
+            ),
+            Track(
+                id="sp_pop_105",
+                title="Vivaldi: The Four Seasons (Spring)",
+                artist_name="Antonio Vivaldi",
+                artist_id="sp_art_vivald_classic",
+                album_name="Classical Masterpieces",
+                duration_ms=215000,
+                isrc="USVIV2200105",
+                preview_url="/static/audio/track106.mp3",
+                cover_url="https://images.unsplash.com/photo-1511497584788-876761c1298b?w=400&auto=format&fit=crop&q=80",
+                category="Deep Focus"
+            )
+        ]
 
     # Playback Controls
     def get_active_devices(self, access_token: str) -> List[dict]:
