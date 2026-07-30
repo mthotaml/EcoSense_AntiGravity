@@ -82,7 +82,7 @@ def healthz():
     }
 
 
-def get_user_candidates(db: Session = None) -> List[Track]:
+def get_user_candidates(db: Session = None) -> List[any]:
     """Retrieve active candidate catalog. When connected to Spotify, uses REAL Spotify tracks and eliminates seed profiles."""
     if db:
         user = db.query(UserRecord).filter(UserRecord.id == "listener_01").first()
@@ -95,6 +95,12 @@ def get_user_candidates(db: Session = None) -> List[Track]:
                     if real_top or real_recent:
                         demo_profile.clear_profile()
                         demo_profile.ingest_signals(real_top, real_recent)
+                        
+                        # Purge seed tracks from queue if present
+                        if any(d.track.id.startswith("sp_track_10") for d in demo_autopilot.upcoming_queue):
+                            demo_autopilot.upcoming_queue = []
+                            demo_autopilot.history_track_ids.clear()
+                            
                         return real_top + real_recent
             except Exception as e:
                 print("Error retrieving real user candidates:", e)
@@ -172,9 +178,9 @@ def read_root(request: Request, db: Session = Depends(get_db)):
         except Exception as e:
             print("Error reading user token:", e)
 
-    template = templates.get_template("index.html")
-    html_content = template.render({
+    html_content = templates.TemplateResponse("index.html", {
         "request": request,
+        "decisions": decisions,
         "current_pick": current_pick,
         "next_pick": next_pick,
         "autopilot_queue": page_items,
