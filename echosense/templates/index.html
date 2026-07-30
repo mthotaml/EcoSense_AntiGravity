@@ -149,10 +149,16 @@
                                         <i class="fa-solid fa-circle-info"></i>
                                     </span>
                                 </th>
+                                <th>
+                                    Why in Queue
+                                    <span class="info-icon" tabindex="0" role="button" aria-label="Human-readable explanation of why this track was selected by Continuous Autopilot." title="Human-readable explanation of why this track was selected by Continuous Autopilot.">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </span>
+                                </th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="autopilotTableBody">
                             {% for dec in autopilot_queue %}
                             <tr>
                                 <td>{{ loop.index }}</td>
@@ -169,6 +175,12 @@
                                 <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: {{ int(dec.factors.live_context_fit*100) }}%;"></span></span> {{ int(dec.factors.live_context_fit*100) }}%</td>
                                 <td><span class="score-pill">+{{ int(dec.factors.learned_preference*100) }}%</span></td>
                                 <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> {{ int(dec.factors.diversity_guard*100) }}%</span></td>
+                                <td>
+                                    <div style="font-size: 0.82rem; color: #d0d0d0; max-width: 280px; line-height: 1.35;">
+                                        <i class="fa-solid fa-sparkles" style="color: #1ed760; margin-right: 4px;"></i>
+                                        {{ dec.why_now }}
+                                    </div>
+                                </td>
                                 <td><button class="btn-play-now" data-id="{{ dec.decision_id }}">Play now</button></td>
                             </tr>
                             {% endfor %}

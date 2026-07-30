@@ -125,14 +125,23 @@ class ContextualRanker:
         return fit
 
     def _build_explanation(self, track: Track, factors: FactorScore, context_data: Dict) -> str:
-        """Construct clear, transparent explanation for the listener."""
-        daypart = context_data.get('daypart', 'afternoon')
-        activity = context_data.get('activity', 'focus')
+        """Construct clear, transparent human-readable explanation for the listener."""
+        daypart = context_data.get('daypart', 'afternoon').capitalize()
+        activity = context_data.get('activity', 'focus').capitalize()
         
-        return (
-            f"Fits your durable taste for {track.artist_name} ({int(factors.dna_affinity*100)}% DNA Match) "
-            f"and matches your {daypart} {activity} setting."
-        )
+        dna_pct = int(factors.dna_affinity * 100)
+        ctx_pct = int(factors.live_context_fit * 100)
+        
+        reasons = []
+        if dna_pct >= 75:
+            reasons.append(f"High {dna_pct}% Music DNA match for {track.artist_name}")
+        else:
+            reasons.append(f"{dna_pct}% Music DNA affinity score")
+            
+        reasons.append(f"matches your {daypart} {activity} setting (context capped at 35%)")
+        reasons.append("guarded against artist fatigue (max 2 limit)")
+
+        return ", ".join(reasons) + "."
 
     def _format_context_summary(self, context_data: Dict) -> str:
         parts = []

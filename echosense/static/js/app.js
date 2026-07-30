@@ -165,6 +165,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (track.preview_url) {
                     playTrackAudio(track.preview_url);
                 }
+
+                // 5. Dynamic Continuous Autopilot Queue Table Re-render
+                if (data.autopilot_queue && data.autopilot_queue.length > 0) {
+                    const tbody = document.getElementById('autopilotTableBody');
+                    if (tbody) {
+                        tbody.innerHTML = data.autopilot_queue.map((dec, idx) => `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>
+                                    <div class="table-track-cell">
+                                        <img src="${dec.track.cover_url}" alt="" class="table-thumb">
+                                        <div>
+                                            <strong class="table-track-title">${dec.track.title}</strong>
+                                            <span class="table-artist">${dec.track.artist_name}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill" style="width: ${Math.round(dec.factors.dna_affinity * 100)}%;"></span></span> ${Math.round(dec.factors.dna_affinity * 100)}%</td>
+                                <td><span class="score-bar-bg"><span class="score-bar-fill context" style="width: ${Math.round(dec.factors.live_context_fit * 100)}%;"></span></span> ${Math.round(dec.factors.live_context_fit * 100)}%</td>
+                                <td><span class="score-pill">+${Math.round(dec.factors.learned_preference * 100)}%</span></td>
+                                <td><span class="badge-diversity"><i class="fa-solid fa-shield"></i> ${Math.round(dec.factors.diversity_guard * 100)}%</span></td>
+                                <td>
+                                    <div style="font-size: 0.82rem; color: #d0d0d0; max-width: 280px; line-height: 1.35;">
+                                        <i class="fa-solid fa-sparkles" style="color: #1ed760; margin-right: 4px;"></i>
+                                        ${dec.why_now}
+                                    </div>
+                                </td>
+                                <td><button class="btn-play-now" data-id="${dec.decision_id}">Play now</button></td>
+                            </tr>
+                        `).join('');
+                        
+                        tbody.querySelectorAll('.btn-play-now').forEach(btn => {
+                            btn.addEventListener('click', async () => {
+                                const decisionId = btn.dataset.id;
+                                const res = await fetch('/api/play', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ decision_id: decisionId })
+                                });
+                                const playData = await res.json();
+                                if (playData.now_playing && playData.now_playing.preview_url) {
+                                    playTrackAudio(playData.now_playing.preview_url);
+                                }
+                            });
+                        });
+                    }
+                }
             }
         } catch (e) {
             console.error('Skip error:', e);

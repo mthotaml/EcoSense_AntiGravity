@@ -289,13 +289,17 @@ def skip_current_track(db: Session = Depends(get_db)):
 
     # Consume next track from Autopilot
     next_decision = demo_autopilot.consume_next()
-    if not next_decision:
-        all_candidates = demo_top_tracks + demo_recent_tracks
-        context = context_resolver.get_live_context()
-        new_queue = demo_autopilot.maintain_queue(all_candidates, context)
-        next_decision = new_queue[0]
+    all_candidates = demo_top_tracks + demo_recent_tracks
+    context = context_resolver.get_live_context()
 
-    # Record skipped outcome against current decision
+    if not next_decision:
+        new_queue = demo_autopilot.maintain_queue(all_candidates, context)
+        next_decision = new_queue[0] if new_queue else demo_ranker.rank_candidates(all_candidates, context)[0]
+
+    # Replenish queue for continuous autopilot stream
+    updated_queue = demo_autopilot.maintain_queue(all_candidates, context)
+
+    # Record skipped outcome against decision
     governance = GovernanceEngine(db)
     governance.record_outcome_idempotent(
         outcome_id=f"skip_{uuid.uuid4().hex[:12]}",
@@ -309,7 +313,23 @@ def skip_current_track(db: Session = Depends(get_db)):
         "status": "success",
         "verified_skip": True,
         "now_playing": next_decision.track,
-        "decision_id": next_decision.decision_id
+        "decision_id": next_decision.decision_id,
+        "why_now": next_decision.why_now,
+        "autopilot_queue": [
+            {
+                "decision_id": d.decision_id,
+                "track": d.track,
+                "confidence": d.confidence,
+                "why_now": d.why_now,
+                "factors": {
+                    "dna_affinity": d.factors.dna_affinity,
+                    "live_context_fit": d.factors.live_context_fit,
+                    "learned_preference": d.factors.learned_preference,
+                    "diversity_guard": d.factors.diversity_guard
+                }
+            }
+            for d in updated_queue
+        ]
     }
 
 
