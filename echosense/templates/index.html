@@ -306,6 +306,37 @@
                 </div>
             </section>
 
+            <!-- 8.5 Cognitive Memory Store Inspector -->
+            <section class="cognitive-memory-section card" style="background: rgba(24, 24, 28, 0.7); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="margin: 0;"><i class="fa-solid fa-microchip" style="color: #64b5f6;"></i> Cognitive Memory Store Inspector</h2>
+                    <span class="badge" style="background: rgba(100, 181, 246, 0.2); color: #64b5f6; border: 1px solid rgba(100, 181, 246, 0.4);">
+                        Episodic • Semantic • Working
+                    </span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                    <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="color: #1ed760; margin: 0 0 10px 0; font-size: 0.95rem;"><i class="fa-solid fa-history"></i> Episodic Memory</h4>
+                        <div id="episodicMemoryContainer" style="font-size: 0.85rem; color: #bbb;">
+                            <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• Morning commute stream (Confidence: 0.92)</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="color: #64b5f6; margin: 0 0 10px 0; font-size: 0.95rem;"><i class="fa-solid fa-diagram-project"></i> Semantic Propositions</h4>
+                        <div id="semanticMemoryContainer" style="font-size: 0.85rem; color: #bbb;">
+                            <div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• Listener → Prefers Eco Lo-Fi Beats (Active)</div>
+                            <div style="padding: 6px 0;">• Listener → Avoids Artist Fatigue (Active)</div>
+                        </div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+                        <h4 style="color: #ffb74d; margin: 0 0 10px 0; font-size: 0.95rem;"><i class="fa-solid fa-stopwatch"></i> Working Memory (Expiring)</h4>
+                        <div id="workingMemoryContainer" style="font-size: 0.85rem; color: #bbb;">
+                            <div style="padding: 6px 0;">• Current Focus: Deep Work & Scenic Driving</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Recently Played on Spotify Section -->
             <section class="recently-played-section card" style="margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">

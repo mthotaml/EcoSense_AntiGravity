@@ -550,4 +550,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Load Cognitive Memories into Inspector
+    async function loadCognitiveMemories() {
+        try {
+            const res = await fetch('/api/memory');
+            const data = await res.json();
+            if (data.status === 'success' && data.memories) {
+                const epContainer = document.getElementById('episodicMemoryContainer');
+                const semContainer = document.getElementById('semanticMemoryContainer');
+                const wmContainer = document.getElementById('workingMemoryContainer');
+
+                if (epContainer && data.memories.episodic && data.memories.episodic.length > 0) {
+                    epContainer.innerHTML = data.memories.episodic.map(m => 
+                        `<div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• ${m.experience} <span style="color: #888; font-size: 0.78rem;">(Conf: ${m.confidence})</span></div>`
+                    ).join('');
+                }
+                if (semContainer && data.memories.semantic && data.memories.semantic.length > 0) {
+                    semContainer.innerHTML = data.memories.semantic.map(m => 
+                        `<div style="padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">• <strong>${m.subject}</strong> → ${m.predicate}: <em>${m.object}</em> <span style="color:#1ed760; font-size:0.75rem;">[${m.status}]</span></div>`
+                    ).join('');
+                }
+                if (wmContainer && data.memories.working && data.memories.working.length > 0) {
+                    wmContainer.innerHTML = data.memories.working.map(m => 
+                        `<div style="padding: 6px 0;">• <strong>${m.key}:</strong> ${m.value}</div>`
+                    ).join('');
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load cognitive memories:', e);
+        }
+    }
+    loadCognitiveMemories();
 });
