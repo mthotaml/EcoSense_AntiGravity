@@ -203,7 +203,19 @@ class SpotifyAdapter:
         """Popular Spotify Tracks catalog to ensure rich candidates when offline/unauthenticated."""
         return [
             Track(
-                id="sp_pop_101",
+                id="6jJ0g8Rrz729rUY2oPOeZT",
+                title="Teenage Daydream",
+                artist_name="Reece Jowers",
+                artist_id="sp_art_jowers",
+                album_name="Soothe My Wayward Soul",
+                duration_ms=190000,
+                isrc="USJOW2200101",
+                preview_url="/static/audio/track101.mp3",
+                cover_url="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&auto=format&fit=crop&q=80",
+                category="Recently Played"
+            ),
+            Track(
+                id="0VjdiW2St8KGWjR88Z02xV",
                 title="hiwang hiwang do hiwang - Slowed",
                 artist_name="AntonioVivald",
                 artist_id="sp_art_vivald",
@@ -215,7 +227,7 @@ class SpotifyAdapter:
                 category="Spotify Top"
             ),
             Track(
-                id="sp_pop_102",
+                id="0sf12qvi52faD0biXMOfrm",
                 title="Blinding Lights",
                 artist_name="The Weeknd",
                 artist_id="sp_art_weeknd",
@@ -227,7 +239,7 @@ class SpotifyAdapter:
                 category="Deep Focus"
             ),
             Track(
-                id="sp_pop_103",
+                id="4DkxT3jGoPyL2cHQo2s3ld",
                 title="As It Was",
                 artist_name="Harry Styles",
                 artist_id="sp_art_styles",
@@ -239,7 +251,7 @@ class SpotifyAdapter:
                 category="Eco Lo-Fi Beats"
             ),
             Track(
-                id="sp_pop_104",
+                id="1Bxfay2V2DkXpWyA2BXtB6",
                 title="Cruel Summer",
                 artist_name="Taylor Swift",
                 artist_id="sp_art_swift",
@@ -249,18 +261,6 @@ class SpotifyAdapter:
                 preview_url="/static/audio/track105.mp3",
                 cover_url="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&auto=format&fit=crop&q=80",
                 category="Nature Soundscapes"
-            ),
-            Track(
-                id="sp_pop_105",
-                title="Vivaldi: The Four Seasons (Spring)",
-                artist_name="Antonio Vivaldi",
-                artist_id="sp_art_vivald_classic",
-                album_name="Classical Masterpieces",
-                duration_ms=215000,
-                isrc="USVIV2200105",
-                preview_url="/static/audio/track106.mp3",
-                cover_url="https://images.unsplash.com/photo-1511497584788-876761c1298b?w=400&auto=format&fit=crop&q=80",
-                category="Deep Focus"
             )
         ]
 

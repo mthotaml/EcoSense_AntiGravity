@@ -119,8 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. Stream official Spotify audio & local preview
         const embedIframe = document.getElementById('spotifyEmbedIframe');
         if (embedIframe && track.id) {
-            const spotifyTrackId = track.id.startsWith('sp_pop_') ? '0sf12qvi52faD0biXMOfrm' : track.id;
-            embedIframe.src = `https://open.spotify.com/embed/track/${spotifyTrackId}?utm_source=generator&theme=0&autoplay=1`;
+            embedIframe.src = `https://open.spotify.com/embed/track/${track.id}?utm_source=generator&theme=0&autoplay=1`;
         }
 
         if (track.preview_url) {
